@@ -1,20 +1,49 @@
 ---
-// About.astro — Phase 3 placeholder
+// About.astro — Phase 3
 ---
 
 <section id="about">
   <div class="container">
+    <p class="section-label">About</p>
     <p class="about-text">
-      <!-- Content to be written in Phase 3 -->
-      Placeholder — about section copy goes here.
+      I've spent a decade hunting unauthorized sellers, dismantling grey market
+      networks, and building the enforcement programs that keep distribution
+      clean. The work sits at the edge of compliance and commercial operations —
+      MAP enforcement, anti-diversion strategy, authorized reseller frameworks —
+      and I like it there.
+    </p>
+    <p class="about-subtext">
+      These projects are tools I've built to do that work at scale.
     </p>
   </div>
 </section>
 
 <style>
+  #about {
+    padding-top: 0;
+  }
+
+  .section-label {
+    font-size: var(--size-xs);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+    margin-bottom: var(--space-md);
+  }
+
   .about-text {
     font-size: var(--size-lg);
-    max-width: 600px;
+    max-width: 620px;
     line-height: 1.75;
+    color: var(--color-text);
+  }
+
+  .about-subtext {
+    margin-top: var(--space-md);
+    font-size: var(--size-base);
+    color: var(--color-subtle);
+    max-width: 620px;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
   }
 </style>

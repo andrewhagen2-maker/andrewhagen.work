@@ -1,19 +1,19 @@
 ---
-// Projects.astro — Phase 3 placeholder
+// Projects.astro — Phase 3
 import ProjectCard from "./ProjectCard.astro";
 
 const projects = [
   {
     title: "Brand Channel Intelligence Dashboard",
     description:
-      "Live dashboard demonstrating unauthorized seller monitoring, MAP compliance tracking, and grey market detection using Amazon marketplace data.",
+      "Live dashboard for unauthorized seller monitoring, MAP compliance tracking, and grey market detection across Amazon marketplace data.",
     tags: ["Python", "Streamlit", "Keepa API", "Brand Protection"],
     url: "https://dashboard.andrewhagen.work",
     status: "live" as const,
   },
   {
-    title: "Project Two",
-    description: "Coming soon.",
+    title: "More in development",
+    description: "Additional tools in progress across distribution compliance and enforcement workflows.",
     tags: [],
     status: "coming-soon" as const,
   },
@@ -22,7 +22,7 @@ const projects = [
 
 <section id="projects">
   <div class="container">
-    <h2 class="section-label">Projects</h2>
+    <p class="section-label">Projects</p>
     <div class="grid">
       {projects.map((p) => <ProjectCard {...p} />)}
     </div>
@@ -32,7 +32,7 @@ const projects = [
 <style>
   .section-label {
     font-size: var(--size-xs);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-subtle);
     margin-bottom: var(--space-md);
