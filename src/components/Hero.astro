@@ -1,12 +1,49 @@
 ---
-// Hero.astro — Phase 2 placeholder
-// Full implementation in Phase 2
+// Hero.astro — Phase 2
 ---
 
 <section id="hero">
-  <div class="container">
-    <h1>Andrew Hagen</h1>
-    <p class="title">Compliance &amp; Brand Protection</p>
+  <div class="hero-inner container">
+
+    <!-- Text block -->
+    <div class="hero-text">
+      <p class="hero-eyebrow">Portfolio</p>
+      <h1 class="hero-name">Andrew<br />Hagen</h1>
+      <p class="hero-title">Compliance &amp; Brand Protection</p>
+      <p class="hero-desc">
+        Building tools for marketplace enforcement,<br />
+        distribution hygiene, and channel integrity.
+      </p>
+      <a href="#projects" class="hero-cta">View projects ↓</a>
+    </div>
+
+    <!-- Geometric SVG accent — ISO50 landscape motif -->
+    <!-- Sun circle · mountain triangle · horizon band — flat, hard-edged, palette-matched -->
+    <div class="hero-art" aria-hidden="true">
+      <svg
+        viewBox="0 0 400 480"
+        xmlns="http://www.w3.org/2000/svg"
+        class="hero-svg"
+      >
+        <!-- Sky band (top fill) -->
+        <rect x="0" y="0" width="400" height="480" fill="#E8DDD0" />
+
+        <!-- Horizontal banding stripes — ISO50 sunset layering -->
+        <rect x="0" y="280" width="400" height="18" fill="#D4917A" />
+        <rect x="0" y="298" width="400" height="14" fill="#C05A42" />
+        <rect x="0" y="312" width="400" height="168" fill="#2A2724" />
+
+        <!-- Sun / circle — terracotta, sitting above horizon -->
+        <circle cx="200" cy="240" r="72" fill="#C05A42" />
+
+        <!-- Mountain / triangle — dark, hard geometry over the horizon band -->
+        <polygon points="200,148 340,312 60,312" fill="#2A2724" />
+
+        <!-- Thin horizon accent line -->
+        <rect x="0" y="278" width="400" height="2" fill="#8A7D72" />
+      </svg>
+    </div>
+
   </div>
 </section>
 
@@ -15,19 +52,108 @@
     min-height: 100vh;
     display: flex;
     align-items: center;
+    overflow: hidden;
   }
 
-  h1 {
-    font-size: var(--size-4xl);
-    letter-spacing: 0.05em;
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-lg);
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  /* ── Text ── */
+
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .hero-eyebrow {
+    font-size: var(--size-xs);
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-  }
-
-  .title {
-    font-size: var(--size-lg);
     color: var(--color-subtle);
-    letter-spacing: 0.08em;
+  }
+
+  .hero-name {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 500;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    line-height: 1.0;
+    color: var(--color-text);
+  }
+
+  .hero-title {
+    font-size: var(--size-sm);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-1);
     margin-top: var(--space-xs);
+  }
+
+  .hero-desc {
+    font-size: var(--size-base);
+    color: var(--color-subtle);
+    line-height: 1.7;
+    max-width: 340px;
+    margin-top: var(--space-xs);
+  }
+
+  .hero-cta {
+    display: inline-block;
+    margin-top: var(--space-sm);
+    font-size: var(--size-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-1);
+    padding-bottom: 2px;
+    width: fit-content;
+  }
+
+  .hero-cta:hover {
+    color: var(--accent-1);
+  }
+
+  /* ── SVG Art ── */
+
+  .hero-art {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hero-svg {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    display: block;
+  }
+
+  /* ── Mobile ── */
+
+  @media (max-width: 640px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      padding-top: var(--space-xl);
+    }
+
+    .hero-art {
+      order: -1;
+    }
+
+    .hero-svg {
+      max-width: 240px;
+    }
+
+    .hero-name {
+      font-size: clamp(2.5rem, 12vw, 3.5rem);
+    }
   }
 </style>
