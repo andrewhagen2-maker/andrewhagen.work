@@ -3,7 +3,8 @@
 ---
 
 <section id="about">
-  <div class="container">
+  <!-- Match hero's wide container so left edge aligns with hero text -->
+  <div class="about-inner container">
     <p class="section-label">About</p>
     <p class="about-text">
       I've spent a decade pursuing unauthorized sellers, counterfeiters, and
@@ -23,6 +24,11 @@
     padding-top: 0;
   }
 
+  /* Wide container matches hero's 1100px so left edge lines up */
+  .about-inner {
+    max-width: 1100px;
+  }
+
   .section-label {
     font-size: var(--size-xs);
     letter-spacing: 0.2em;
@@ -33,7 +39,8 @@
 
   .about-text {
     font-size: var(--size-lg);
-    max-width: 620px;
+    /* Spans full 1100px container — left col + gap + right col */
+    max-width: 100%;
     line-height: 1.75;
     color: var(--color-text);
   }
@@ -42,7 +49,7 @@
     margin-top: var(--space-md);
     font-size: var(--size-base);
     color: var(--color-subtle);
-    max-width: 620px;
+    max-width: 100%;
     line-height: 1.7;
     letter-spacing: 0.01em;
   }
