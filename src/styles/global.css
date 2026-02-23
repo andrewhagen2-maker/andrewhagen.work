@@ -103,3 +103,18 @@ a:hover {
 section {
   padding: var(--space-xl) 0;
 }
+
+/* ============================================
+   MOBILE OVERRIDES
+   ============================================ */
+
+@media (max-width: 640px) {
+  :root {
+    --space-xl: 5rem;
+    --space-lg: 2.5rem;
+  }
+
+  .container {
+    padding: 0 var(--space-sm);
+  }
+}

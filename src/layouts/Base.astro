@@ -6,7 +6,7 @@ export interface Props {
 
 const {
   title = "Andrew Hagen",
-  description = "Compliance and brand protection professional building tools for distribution hygiene and marketplace enforcement.",
+  description = "Brand protection and channel integrity professional. A decade pursuing unauthorized sellers, dismantling grey market networks, and building the enforcement programs that keep distribution clean.",
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -32,8 +32,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
 
-    <!-- Favicon placeholder — replace with geometric SVG favicon in Phase 4 -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Mobile browser chrome color -->
+    <meta name="theme-color" content="#F0EAE0" />
 
     <!-- Styles injected via index.astro import -->
   </head>
