@@ -17,30 +17,60 @@
       <a href="#projects" class="hero-cta">View projects ↓</a>
     </div>
 
-    <!-- Geometric SVG accent — ISO50 landscape motif -->
-    <!-- Sun circle · mountain triangle · horizon band — flat, hard-edged, palette-matched -->
+    <!-- Geometric SVG accent — yin-yang in palette colors, flat hard-edged -->
     <div class="hero-art" aria-hidden="true">
       <svg
-        viewBox="0 0 400 480"
+        viewBox="0 0 400 400"
         xmlns="http://www.w3.org/2000/svg"
         class="hero-svg"
       >
-        <!-- Sky band (top fill) -->
-        <rect x="0" y="0" width="400" height="480" fill="#E8DDD0" />
+        <!--
+          Yin-yang construction — all pure geometry, no curves library needed:
+          - Outer circle: full symbol boundary
+          - Left half (charcoal): left semicircle
+          - Top half-lune (terracotta): small top semicircle adds terracotta to top of charcoal side
+          - Bottom half-lune (charcoal): small bottom semicircle cuts back into terracotta side
+          - Small dot top (terracotta): dot inside charcoal lune
+          - Small dot bottom (charcoal): dot inside terracotta lune
+          Built using clipPath to keep it crisp and mathematically exact.
+        -->
 
-        <!-- Horizontal banding stripes — ISO50 sunset layering -->
-        <rect x="0" y="280" width="400" height="18" fill="#D4917A" />
-        <rect x="0" y="298" width="400" height="14" fill="#C05A42" />
-        <rect x="0" y="312" width="400" height="168" fill="#2A2724" />
+        <defs>
+          <!-- Clip to left half of the full circle -->
+          <clipPath id="left-half">
+            <rect x="0" y="0" width="200" height="400" />
+          </clipPath>
+          <!-- Clip to right half -->
+          <clipPath id="right-half">
+            <rect x="200" y="0" width="200" height="400" />
+          </clipPath>
+          <!-- Clip to top half -->
+          <clipPath id="top-half">
+            <rect x="0" y="0" width="400" height="200" />
+          </clipPath>
+          <!-- Clip to bottom half -->
+          <clipPath id="bottom-half">
+            <rect x="0" y="200" width="400" height="200" />
+          </clipPath>
+        </defs>
 
-        <!-- Sun / circle — terracotta, sitting above horizon -->
-        <circle cx="200" cy="240" r="72" fill="#C05A42" />
+        <!-- Base: full circle in terracotta (right/light side base) -->
+        <circle cx="200" cy="200" r="180" fill="#C05A42" />
 
-        <!-- Mountain / triangle — dark, hard geometry over the horizon band -->
-        <polygon points="200,148 340,312 60,312" fill="#2A2724" />
+        <!-- Left half: charcoal -->
+        <circle cx="200" cy="200" r="180" fill="#2A2724" clip-path="url(#left-half)" />
 
-        <!-- Thin horizon accent line -->
-        <rect x="0" y="278" width="400" height="2" fill="#8A7D72" />
+        <!-- Top small semicircle: terracotta bulges into charcoal side (top) -->
+        <circle cx="200" cy="110" r="90" fill="#C05A42" clip-path="url(#top-half)" />
+
+        <!-- Bottom small semicircle: charcoal bulges into terracotta side (bottom) -->
+        <circle cx="200" cy="290" r="90" fill="#2A2724" clip-path="url(#bottom-half)" />
+
+        <!-- Small dot top: terracotta pip inside the charcoal lune -->
+        <circle cx="200" cy="110" r="28" fill="#C05A42" />
+
+        <!-- Small dot bottom: charcoal pip inside the terracotta lune -->
+        <circle cx="200" cy="290" r="28" fill="#2A2724" />
       </svg>
     </div>
 
@@ -131,7 +161,7 @@
 
   .hero-svg {
     width: 100%;
-    max-width: 360px;
+    max-width: 280px;
     height: auto;
     display: block;
   }
@@ -149,7 +179,7 @@
     }
 
     .hero-svg {
-      max-width: 240px;
+      max-width: 180px;
     }
 
     .hero-name {
