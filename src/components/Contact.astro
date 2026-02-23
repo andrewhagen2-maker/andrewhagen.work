@@ -1,0 +1,39 @@
+---
+// Contact.astro — Phase 4 placeholder
+---
+
+<section id="contact">
+  <div class="container">
+    <h2 class="section-label">Contact</h2>
+    <div class="links">
+      <a href="https://linkedin.com/in/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-label {
+    font-size: var(--size-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+    margin-bottom: var(--space-md);
+  }
+
+  .links {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  a {
+    font-size: var(--size-base);
+    letter-spacing: 0.06em;
+    color: var(--color-text);
+    text-transform: uppercase;
+  }
+
+  a:hover {
+    color: var(--accent-1);
+  }
+</style>

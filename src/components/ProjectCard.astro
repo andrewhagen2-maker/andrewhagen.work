@@ -1,0 +1,103 @@
+---
+// ProjectCard.astro
+export interface Props {
+  title: string;
+  description: string;
+  tags: string[];
+  url?: string;
+  status: "live" | "coming-soon";
+}
+
+const { title, description, tags, url, status } = Astro.props;
+---
+
+<div class={`card ${status === "coming-soon" ? "card--muted" : ""}`}>
+  <div class="card-header">
+    <h3 class="card-title">{title}</h3>
+    {status === "coming-soon" && <span class="badge">Coming soon</span>}
+  </div>
+  <p class="card-description">{description}</p>
+  <div class="card-tags">
+    {tags.map((tag) => <span class="tag">{tag}</span>)}
+  </div>
+  {status === "live" && url && (
+    <a class="card-link" href={url} target="_blank" rel="noopener noreferrer">
+      View project →
+    </a>
+  )}
+</div>
+
+<style>
+  .card {
+    border: 1px solid var(--color-text);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .card--muted {
+    border-color: var(--color-subtle);
+    opacity: 0.6;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+  }
+
+  .card-title {
+    font-size: var(--size-lg);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .badge {
+    font-size: var(--size-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+  }
+
+  .card-description {
+    font-size: var(--size-base);
+    color: var(--color-subtle);
+    line-height: 1.6;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .tag {
+    font-size: var(--size-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-3);
+  }
+
+  .tag + .tag::before {
+    content: "·";
+    margin-right: var(--space-xs);
+    color: var(--color-subtle);
+  }
+
+  .card-link {
+    font-size: var(--size-sm);
+    letter-spacing: 0.04em;
+    color: var(--accent-1);
+    margin-top: var(--space-xs);
+  }
+
+  .card-link:hover {
+    color: var(--color-text);
+  }
+
+  /* Hover state — border color shift only, no motion */
+  .card:not(.card--muted):hover {
+    border-color: var(--accent-1);
+  }
+</style>

@@ -1,0 +1,97 @@
+/* ============================================
+   DESIGN TOKENS
+   Palette: Option A — Warm light (cream field)
+   Inspired by Tycho / ISO50 aesthetic
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  /* Colors */
+  --color-bg:       #F0EAE0;
+  --color-text:     #2A2724;
+  --color-subtle:   #8A7D72;
+  --accent-1:       #C05A42;  /* terracotta */
+  --accent-2:       #8A7A9E;  /* slate-violet */
+  --accent-3:       #537D8A;  /* dusty teal */
+  --accent-4:       #D4917A;  /* dusty rose */
+
+  /* Typography */
+  --font-base:      'DM Sans', system-ui, sans-serif;
+  --size-xs:        0.75rem;
+  --size-sm:        0.875rem;
+  --size-base:      1rem;
+  --size-lg:        1.25rem;
+  --size-xl:        1.5rem;
+  --size-2xl:       2rem;
+  --size-3xl:       3rem;
+  --size-4xl:       4rem;
+
+  /* Spacing */
+  --space-xs:       0.5rem;
+  --space-sm:       1rem;
+  --space-md:       2rem;
+  --space-lg:       4rem;
+  --space-xl:       8rem;
+
+  /* Layout */
+  --max-width:      860px;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-base);
+  font-weight: 300;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1, h2, h3 {
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--accent-1);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-text);
+}
+
+/* ============================================
+   LAYOUT UTILITY
+   ============================================ */
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+section {
+  padding: var(--space-xl) 0;
+}

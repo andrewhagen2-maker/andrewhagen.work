@@ -1,0 +1,43 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Andrew Hagen",
+  description = "Compliance and brand protection professional building tools for distribution hygiene and marketplace enforcement.",
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary meta -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- No crawler indexing -->
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- Open Graph (LinkedIn preview) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+
+    <!-- Favicon placeholder — replace with geometric SVG favicon in Phase 4 -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Styles injected via index.astro import -->
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
