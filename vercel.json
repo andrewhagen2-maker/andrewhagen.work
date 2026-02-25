@@ -1,14 +1,14 @@
 {
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [
         {
           "type": "host",
           "value": "dashboard.andrewhagen.work"
         }
       ],
-      "destination": "https://dashboard-ra4y8jaxetweo6u9gdqg86.streamlit.app/:path*",
+      "destination": "https://dashboard-ra4y8jaxetweo6u9gdqg86.streamlit.app",
       "permanent": false
     }
   ]
