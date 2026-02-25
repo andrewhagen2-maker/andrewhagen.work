@@ -101,7 +101,7 @@ a:hover {
 }
 
 section {
-  padding: var(--space-xl) 0;
+  padding: var(--space-lg) 0;
 }
 
 /* ============================================
@@ -111,7 +111,7 @@ section {
 @media (max-width: 640px) {
   :root {
     --space-xl: 5rem;
-    --space-lg: 2.5rem;
+    --space-lg: 2rem;
   }
 
   .container {
