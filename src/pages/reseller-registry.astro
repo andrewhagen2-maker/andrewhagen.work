@@ -337,7 +337,7 @@ import '../styles/global.css';
             : (ch.domain_name || 'Website');
           const cls = ch.channel_type === 'Marketplace' ? 'ch-badge-mkt' : 'ch-badge-web';
           return `<span class="ch-badge ${cls}">${label}</span>`;
-        }).join('');
+        }).join(' ');
         channelHtml = `<div class="channel-cell-inner">${badges}</div>`;
       }
 
@@ -949,6 +949,8 @@ import '../styles/global.css';
     background: none;
     letter-spacing: 0.04em;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .btn-primary {
