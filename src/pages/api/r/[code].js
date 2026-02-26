@@ -26,16 +26,22 @@ export async function GET({ params, request }) {
     });
   }
 
-  // Log the scan — fire and don't await so redirect is not delayed by the write
+  // Log the scan — await so write completes before redirect
+  // Adds ~500ms to redirect but guarantees the row is written
   const user_agent = headers.get('user-agent') || '';
   const country = headers.get('x-vercel-ip-country') || '';
 
-  writeScan({
-    code_id: entry.code_id,
-    distributor: entry.distributor,
-    user_agent,
-    country,
-  }).catch((err) => console.error('Sheets writeScan error:', err));
+  try {
+    await writeScan({
+      code_id: entry.code_id,
+      distributor: entry.distributor,
+      user_agent,
+      country,
+    });
+  } catch (err) {
+    // Log failure but still redirect — scan logging is non-blocking for the user
+    console.error('Sheets writeScan error:', err);
+  }
 
   return new Response(null, {
     status: 302,
