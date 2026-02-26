@@ -1,0 +1,420 @@
+---
+// QrGenerator.astro — QR code generator form + output
+// All Sheets interaction goes through /api/generate (server-side)
+// QR code is rendered client-side via qrcode library after server confirms the code
+---
+
+<div class="generator">
+
+  <!-- Form -->
+  <form class="generator-form" id="qr-form">
+    <div class="field">
+      <label class="field-label" for="distributor">Distributor / Retailer</label>
+      <input
+        class="field-input"
+        type="text"
+        id="distributor"
+        name="distributor"
+        placeholder="e.g. ACME Distribution Co."
+        required
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="destination_url">Destination URL</label>
+      <input
+        class="field-input"
+        type="url"
+        id="destination_url"
+        name="destination_url"
+        placeholder="https://example.com"
+        required
+        autocomplete="off"
+      />
+      <p class="field-hint">Where the QR code will redirect — e.g. your brand's product page.</p>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="notes">Batch notes <span class="field-optional">(optional)</span></label>
+      <input
+        class="field-input"
+        type="text"
+        id="notes"
+        name="notes"
+        placeholder="e.g. Q1 2026 drinkware shipment"
+        autocomplete="off"
+      />
+    </div>
+
+    <button class="btn" type="submit" id="submit-btn">Generate QR Code</button>
+    <p class="form-error" id="form-error" aria-live="polite"></p>
+  </form>
+
+  <!-- Output — hidden until code is generated -->
+  <div class="output" id="output" hidden>
+    <div class="output-divider"></div>
+
+    <p class="output-meta" id="output-meta"></p>
+
+    <!-- QR canvas -->
+    <div class="qr-wrap">
+      <canvas id="qr-canvas"></canvas>
+    </div>
+
+    <!-- Editable label text for print -->
+    <div class="label-edit">
+      <div class="field">
+        <label class="field-label" for="label-above">Label text — above QR</label>
+        <input
+          class="field-input"
+          type="text"
+          id="label-above"
+          value="Scan to verify authenticity"
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="label-below">Label text — below QR <span class="field-optional">(optional)</span></label>
+        <input
+          class="field-input"
+          type="text"
+          id="label-below"
+          placeholder="Leave blank to omit"
+        />
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="output-actions">
+      <button class="btn" id="download-btn" type="button">Download PNG</button>
+      <button class="btn btn--secondary" id="print-btn" type="button">Print labels</button>
+    </div>
+
+    <!-- Generate another -->
+    <button class="btn btn--ghost" id="reset-btn" type="button">← Generate another code</button>
+  </div>
+
+  <!-- Print area — only visible during print -->
+  <div class="print-area" id="print-area" aria-hidden="true">
+    <p class="print-label-above" id="print-label-above"></p>
+    <img class="print-qr" id="print-qr" src="" alt="QR code" />
+    <p class="print-label-below" id="print-label-below"></p>
+  </div>
+
+</div>
+
+<script>
+  import QRCode from 'qrcode';
+
+  const form = document.getElementById('qr-form');
+  const output = document.getElementById('output');
+  const submitBtn = document.getElementById('submit-btn');
+  const formError = document.getElementById('form-error');
+  const outputMeta = document.getElementById('output-meta');
+  const canvas = document.getElementById('qr-canvas');
+  const downloadBtn = document.getElementById('download-btn');
+  const printBtn = document.getElementById('print-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const labelAbove = document.getElementById('label-above');
+  const labelBelow = document.getElementById('label-below');
+  const printArea = document.getElementById('print-area');
+  const printLabelAbove = document.getElementById('print-label-above');
+  const printLabelBelow = document.getElementById('print-label-below');
+  const printQr = document.getElementById('print-qr');
+
+  let currentQrUrl = '';
+  let currentDistributor = '';
+
+  // Generate QR code onto canvas
+  async function renderQr(url) {
+    await QRCode.toCanvas(canvas, url, {
+      width: 280,
+      margin: 2,
+      color: {
+        dark: '#2A2724',
+        light: '#F0EAE0',
+      },
+    });
+  }
+
+  // Form submit → call /api/generate → render QR
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formError.textContent = '';
+    submitBtn.textContent = 'Generating…';
+    submitBtn.disabled = true;
+
+    const distributor = document.getElementById('distributor').value.trim();
+    const destination_url = document.getElementById('destination_url').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+
+    let data;
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ distributor, destination_url, notes }),
+      });
+      data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Server error');
+    } catch (err) {
+      formError.textContent = `Error: ${err.message}`;
+      submitBtn.textContent = 'Generate QR Code';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    currentQrUrl = data.qr_url;
+    currentDistributor = data.distributor;
+
+    await renderQr(currentQrUrl);
+
+    outputMeta.textContent = `Code ${data.code_id} · ${distributor} · redirects to ${destination_url}`;
+
+    form.hidden = true;
+    output.hidden = false;
+  });
+
+  // Download PNG
+  downloadBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `qr-${currentDistributor.replace(/\s+/g, '-').toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // Print — populate print area then trigger browser print
+  printBtn.addEventListener('click', async () => {
+    const above = labelAbove.value.trim();
+    const below = labelBelow.value.trim();
+
+    printLabelAbove.textContent = above;
+    printLabelAbove.style.display = above ? '' : 'none';
+
+    printLabelBelow.textContent = below;
+    printLabelBelow.style.display = below ? '' : 'none';
+
+    // Render a high-res version for print
+    const printCanvas = document.createElement('canvas');
+    await QRCode.toCanvas(printCanvas, currentQrUrl, {
+      width: 600,
+      margin: 2,
+      color: { dark: '#2A2724', light: '#F0EAE0' },
+    });
+    printQr.src = printCanvas.toDataURL('image/png');
+
+    // Small delay to let the image load before print dialog
+    setTimeout(() => window.print(), 100);
+  });
+
+  // Reset — show form again
+  resetBtn.addEventListener('click', () => {
+    output.hidden = true;
+    form.hidden = false;
+    form.reset();
+    submitBtn.textContent = 'Generate QR Code';
+    submitBtn.disabled = false;
+    currentQrUrl = '';
+    currentDistributor = '';
+  });
+</script>
+
+<style>
+  .generator {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* Form fields */
+  .generator-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field-label {
+    font-size: var(--size-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+  }
+
+  .field-optional {
+    font-size: var(--size-xs);
+    letter-spacing: 0.05em;
+    text-transform: none;
+    color: var(--color-subtle);
+    opacity: 0.7;
+  }
+
+  .field-input {
+    background: transparent;
+    border: 1px solid var(--color-text);
+    color: var(--color-text);
+    font-family: var(--font-base);
+    font-size: var(--size-base);
+    font-weight: 300;
+    padding: 0.6rem 0.75rem;
+    width: 100%;
+    outline: none;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  .field-input::placeholder {
+    color: var(--color-subtle);
+    opacity: 0.6;
+  }
+
+  .field-input:focus {
+    border-color: var(--accent-1);
+  }
+
+  .field-hint {
+    font-size: var(--size-xs);
+    color: var(--color-subtle);
+    line-height: 1.5;
+  }
+
+  .form-error {
+    font-size: var(--size-sm);
+    color: var(--accent-1);
+    min-height: 1.2em;
+  }
+
+  /* Buttons */
+  .btn {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: 1px solid var(--color-text);
+    font-family: var(--font-base);
+    font-size: var(--size-xs);
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 0;
+    width: fit-content;
+  }
+
+  .btn:hover {
+    background: var(--accent-1);
+    border-color: var(--accent-1);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn--secondary {
+    background: transparent;
+    color: var(--color-text);
+  }
+
+  .btn--secondary:hover {
+    background: transparent;
+    color: var(--accent-1);
+    border-color: var(--accent-1);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-subtle);
+    padding-left: 0;
+    font-size: var(--size-xs);
+  }
+
+  .btn--ghost:hover {
+    background: transparent;
+    border-color: transparent;
+    color: var(--accent-1);
+  }
+
+  /* Output section */
+  .output-divider {
+    width: 2rem;
+    height: 2px;
+    background: var(--color-text);
+    margin: var(--space-lg) 0 var(--space-md);
+  }
+
+  .output-meta {
+    font-size: var(--size-xs);
+    letter-spacing: 0.08em;
+    color: var(--color-subtle);
+    margin-bottom: var(--space-md);
+    word-break: break-all;
+  }
+
+  .qr-wrap {
+    border: 1px solid var(--color-text);
+    display: inline-block;
+    padding: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .qr-wrap canvas {
+    display: block;
+  }
+
+  .label-edit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .output-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+  }
+
+  /* Print area — hidden on screen, shown only during print */
+  .print-area {
+    display: none;
+  }
+
+  /* ============================================
+     PRINT STYLES
+     ============================================ */
+  @media print {
+    /* Hide everything except print area */
+    body > * {
+      display: none !important;
+    }
+
+    .print-area {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-base), sans-serif;
+      color: #2A2724;
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+
+    .print-label-above,
+    .print-label-below {
+      font-size: 11pt;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    .print-qr {
+      width: 2in;
+      height: 2in;
+    }
+  }
+</style>

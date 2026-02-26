@@ -1,0 +1,104 @@
+---
+export const prerender = false;
+import Base from '../layouts/Base.astro';
+import QrGenerator from '../components/QrGenerator.astro';
+import '../styles/global.css';
+---
+
+<Base
+  title="QR Generator — Andrew Hagen"
+  description="Shipment-level QR code generator for covert distributor tracking."
+>
+  <main class="page">
+    <div class="container">
+
+      <nav class="page-nav">
+        <a href="/">← andrewhagen.work</a>
+      </nav>
+
+      <header class="page-header">
+        <p class="section-label">Distribution Compliance Tool</p>
+        <h1 class="page-title">QR Tracking Generator</h1>
+        <p class="page-description">
+          Generate a unique tracking code tied to a distributor. Print it on shipment labels.
+          Every scan is logged silently — the recipient sees only a redirect to your destination URL.
+        </p>
+      </header>
+
+      <QrGenerator />
+
+      <aside class="how-it-works">
+        <p class="section-label">How it works</p>
+        <p>
+          Each code is a random 6-character ID stored in a private log alongside the distributor name and destination URL.
+          The QR code URL (<code>andrewhagen.work/api/r/[code]</code>) reveals nothing about the distributor.
+          When scanned, a serverless function looks up the code, logs the timestamp, device type, and country,
+          then redirects to the destination — imperceptible to the person scanning.
+          Scan data is viewable on the <a href="/qr-dashboard">scan dashboard</a>.
+        </p>
+      </aside>
+
+    </div>
+  </main>
+</Base>
+
+<style>
+  .page {
+    min-height: 100vh;
+    padding: var(--space-lg) 0;
+  }
+
+  .page-nav {
+    margin-bottom: var(--space-lg);
+    font-size: var(--size-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .page-nav a {
+    color: var(--color-subtle);
+  }
+
+  .page-nav a:hover {
+    color: var(--accent-1);
+  }
+
+  .page-header {
+    margin-bottom: var(--space-lg);
+  }
+
+  .page-title {
+    font-size: var(--size-2xl);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    margin-bottom: var(--space-sm);
+  }
+
+  .page-description {
+    font-size: var(--size-base);
+    color: var(--color-subtle);
+    max-width: 540px;
+    line-height: 1.7;
+  }
+
+  .how-it-works {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-subtle);
+    max-width: 560px;
+  }
+
+  .how-it-works p:last-child {
+    font-size: var(--size-sm);
+    color: var(--color-subtle);
+    line-height: 1.75;
+  }
+
+  .how-it-works code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+    color: var(--color-text);
+    background: rgba(42, 39, 36, 0.08);
+    padding: 0.1em 0.35em;
+  }
+</style>

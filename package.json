@@ -9,6 +9,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "@astrojs/vercel": "^9.0.4",
+    "astro": "^5.17.1",
+    "googleapis": "^171.4.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "dotenv": "^17.3.1"
   }
 }
