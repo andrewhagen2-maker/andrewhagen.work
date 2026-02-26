@@ -1,0 +1,1251 @@
+---
+export const prerender = false;
+import Base from '../layouts/Base.astro';
+import '../styles/global.css';
+---
+
+<Base
+  title="Reseller Registry — Andrew Hagen"
+  description="Authorized seller network admin tool."
+>
+  <main class="page">
+    <div class="container">
+
+      <!-- Password gate -->
+      <div id="gate" class="gate">
+        <div class="gate-inner">
+          <p class="section-label">Authorized Access</p>
+          <h1 class="gate-title">Reseller Registry</h1>
+          <p class="gate-desc">Enter the admin password to access the authorized seller network.</p>
+          <form id="gate-form" class="gate-form">
+            <input
+              id="gate-input"
+              type="password"
+              placeholder="Password"
+              autocomplete="current-password"
+              class="gate-input"
+            />
+            <button type="submit" class="btn btn-primary">Enter</button>
+          </form>
+          <p id="gate-error" class="gate-error" style="display:none">Incorrect password.</p>
+        </div>
+      </div>
+
+      <!-- Registry UI (hidden until authenticated) -->
+      <div id="registry" style="display:none">
+
+        <nav class="page-nav">
+          <a href="/">← andrewhagen.work</a>
+        </nav>
+
+        <header class="page-header">
+          <div class="page-header-row">
+            <div>
+              <p class="section-label">Distribution Compliance Tool</p>
+              <h1 class="page-title">Authorized Seller Registry</h1>
+            </div>
+            <button id="btn-add" class="btn btn-primary">+ Add Seller</button>
+          </div>
+        </header>
+
+        <!-- Filters -->
+        <div class="filters">
+          <input id="search" type="search" placeholder="Search by name or email…" class="filter-input" />
+          <select id="filter-status" class="filter-select">
+            <option value="">All Statuses</option>
+            <option value="Authorized">Authorized</option>
+            <option value="Unauthorized">Unauthorized</option>
+          </select>
+          <select id="filter-policy" class="filter-select">
+            <option value="">All Policies</option>
+            <option value="Authorized Reseller">Authorized Reseller</option>
+            <option value="Authorized Retailer">Authorized Retailer</option>
+          </select>
+          <button id="btn-logout" class="btn btn-ghost">Log out</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <div id="loading" class="table-status">Loading…</div>
+          <div id="empty" class="table-status" style="display:none">No records match.</div>
+          <table id="seller-table" style="display:none">
+            <thead>
+              <tr>
+                <th>Account ID</th>
+                <th>Entity Name</th>
+                <th>Status</th>
+                <th>Policy</th>
+                <th>Countries</th>
+                <th>Date Authorized</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="seller-tbody"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /registry -->
+    </div><!-- /container -->
+  </main>
+
+  <!-- Add / Edit Seller panel -->
+  <div id="panel-overlay" class="panel-overlay" style="display:none"></div>
+  <aside id="seller-panel" class="seller-panel" style="display:none">
+    <div class="panel-header">
+      <h2 id="panel-title" class="panel-heading">Add Seller</h2>
+      <button id="panel-close" class="panel-close" aria-label="Close">✕</button>
+    </div>
+    <div class="panel-body">
+      <form id="seller-form" novalidate>
+        <input type="hidden" id="seller-id" />
+
+        <fieldset class="form-section">
+          <legend class="form-legend">Identity</legend>
+
+          <label class="form-label">
+            Seller Entity Name <span class="required">*</span>
+            <input type="text" id="f-entity-name" class="form-input" required />
+          </label>
+
+          <label class="form-label">
+            Legal Names / DBA
+            <input type="text" id="f-legal-dba" class="form-input" />
+          </label>
+
+          <label class="form-label">
+            Policy <span class="required">*</span>
+            <select id="f-policy" class="form-input">
+              <option value="">— select —</option>
+              <option value="Authorized Reseller">Authorized Reseller</option>
+              <option value="Authorized Retailer">Authorized Retailer</option>
+            </select>
+          </label>
+
+          <label class="form-label">
+            Authorization Status
+            <select id="f-status" class="form-input">
+              <option value="Authorized">Authorized</option>
+              <option value="Unauthorized">Unauthorized</option>
+            </select>
+          </label>
+
+          <label class="form-label">
+            Date Authorized
+            <input type="date" id="f-date-authorized" class="form-input" />
+          </label>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend class="form-legend">Geography & Channels</legend>
+
+          <div class="form-label">
+            Authorized Countries
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="countries" value="United States" /> United States</label>
+              <label><input type="checkbox" name="countries" value="Canada" /> Canada</label>
+              <label><input type="checkbox" name="countries" value="Mexico" /> Mexico</label>
+            </div>
+          </div>
+
+          <div class="form-label">
+            Approved Sale Locations
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="locations" value="Brick & Mortar" /> Brick &amp; Mortar</label>
+              <label><input type="checkbox" name="locations" value="Online Website" /> Online Website</label>
+              <label><input type="checkbox" name="locations" value="Online Marketplace Platform" /> Online Marketplace Platform</label>
+            </div>
+          </div>
+
+          <div class="form-label">
+            Product Categories Approved
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="categories" value="Retail Line" /> Retail Line</label>
+              <label><input type="checkbox" name="categories" value="Commercial Line" /> Commercial Line</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend class="form-legend">Contact</legend>
+
+          <div class="form-label">
+            Account Emails
+            <div id="email-list" class="multi-list"></div>
+            <div class="email-add-row">
+              <input type="email" id="email-input" class="form-input" placeholder="email@example.com" />
+              <button type="button" id="btn-add-email" class="btn btn-ghost btn-sm">Add</button>
+            </div>
+            <p id="email-error" class="field-error" style="display:none">Enter a valid email address.</p>
+          </div>
+
+          <div class="form-label">
+            Physical Addresses
+            <div id="address-list" class="multi-list"></div>
+            <textarea id="address-input" class="form-input form-textarea" placeholder="Street, City, State, ZIP, Country"></textarea>
+            <button type="button" id="btn-add-address" class="btn btn-ghost btn-sm" style="margin-top:0.4rem">Add Address</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend class="form-legend">Notes</legend>
+          <label class="form-label">
+            Internal Notes
+            <textarea id="f-notes" class="form-input form-textarea" rows="4"></textarea>
+          </label>
+        </fieldset>
+
+        <!-- Channel authorizations — edit mode only -->
+        <fieldset class="form-section" id="channels-section" style="display:none">
+          <legend class="form-legend">Online Channel Authorizations</legend>
+          <p class="channels-hint">Add authorizations for approved websites or marketplace seller accounts.</p>
+
+          <div id="channel-list" class="channel-list"></div>
+
+          <button type="button" id="btn-add-channel" class="btn btn-ghost btn-sm">+ Add Channel</button>
+
+          <!-- Inline channel form (hidden by default) -->
+          <div id="channel-form-wrap" class="channel-form-wrap" style="display:none">
+            <input type="hidden" id="ch-id" />
+            <div class="ch-form-row">
+              <label class="form-label" style="flex:1">
+                Channel Type <span class="required">*</span>
+                <select id="ch-type" class="form-input">
+                  <option value="">— select —</option>
+                  <option value="Website">Website</option>
+                  <option value="Marketplace">Marketplace</option>
+                </select>
+              </label>
+              <label class="form-label" style="flex:1">
+                Date Authorized
+                <input type="date" id="ch-date" class="form-input" />
+              </label>
+            </div>
+
+            <!-- Website fields -->
+            <div id="ch-website-fields" style="display:none">
+              <label class="form-label">
+                Domain Name
+                <input type="text" id="ch-domain" class="form-input" placeholder="example.com" />
+              </label>
+            </div>
+
+            <!-- Marketplace fields -->
+            <div id="ch-marketplace-fields" style="display:none">
+              <label class="form-label">
+                Marketplace Platform <span class="required">*</span>
+                <select id="ch-platform" class="form-input">
+                  <option value="">— select —</option>
+                  <option value="Amazon.com">Amazon.com</option>
+                  <option value="eBay.com">eBay.com</option>
+                  <option value="Walmart.com">Walmart.com</option>
+                </select>
+              </label>
+              <label class="form-label">
+                Seller Name
+                <input type="text" id="ch-seller-name" class="form-input" />
+              </label>
+              <label class="form-label">
+                Seller ID (on platform)
+                <input type="text" id="ch-seller-id" class="form-input" />
+              </label>
+            </div>
+
+            <div id="ch-error" class="field-error" style="display:none"></div>
+
+            <div class="ch-form-actions">
+              <button type="button" id="btn-ch-cancel" class="btn btn-ghost btn-sm">Cancel</button>
+              <button type="button" id="btn-ch-save" class="btn btn-primary btn-sm">Save Channel</button>
+            </div>
+          </div>
+        </fieldset>
+
+        <div id="form-error" class="form-error" style="display:none"></div>
+
+        <div class="panel-footer">
+          <button type="button" id="btn-delete" class="btn btn-danger" style="display:none">Delete Seller</button>
+          <button type="submit" class="btn btn-primary" id="btn-save">Save</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</Base>
+
+<script>
+  // ── Auth ────────────────────────────────────────────────────────────────
+  const STORAGE_KEY = 'rr_auth';
+
+  function isAuthed() {
+    return sessionStorage.getItem(STORAGE_KEY) === '1';
+  }
+
+  function showRegistry() {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('registry').style.display = 'block';
+    loadSellers();
+  }
+
+  if (isAuthed()) showRegistry();
+
+  document.getElementById('gate-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pw = document.getElementById('gate-input').value;
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    if (res.ok) {
+      sessionStorage.setItem(STORAGE_KEY, '1');
+      showRegistry();
+    } else {
+      document.getElementById('gate-error').style.display = 'block';
+    }
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
+
+  // ── Sellers data ─────────────────────────────────────────────────────────
+  let allSellers = [];
+
+  async function loadSellers() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('seller-table').style.display = 'none';
+    document.getElementById('empty').style.display = 'none';
+
+    const res = await fetch('/api/sellers');
+    allSellers = await res.json();
+    renderTable();
+  }
+
+  function renderTable() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const status = document.getElementById('filter-status').value;
+    const policy = document.getElementById('filter-policy').value;
+
+    let rows = allSellers.filter(s => {
+      const matchSearch = !search ||
+        s.entity_name?.toLowerCase().includes(search) ||
+        (s.emails || []).some(e => e.toLowerCase().includes(search));
+      const matchStatus = !status || s.authorization_status === status;
+      const matchPolicy = !policy || s.policy === policy;
+      return matchSearch && matchStatus && matchPolicy;
+    });
+
+    document.getElementById('loading').style.display = 'none';
+
+    const tbody = document.getElementById('seller-tbody');
+    tbody.innerHTML = '';
+
+    if (rows.length === 0) {
+      document.getElementById('empty').style.display = 'block';
+      document.getElementById('seller-table').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('seller-table').style.display = 'table';
+
+    rows.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="mono">${s.account_id || '—'}</td>
+        <td class="name-cell">${s.entity_name}</td>
+        <td><span class="badge badge-${s.authorization_status === 'Authorized' ? 'auth' : 'unauth'}">${s.authorization_status}</span></td>
+        <td>${s.policy || '—'}</td>
+        <td>${(s.authorized_countries || []).join(', ') || '—'}</td>
+        <td>${s.date_authorized || '—'}</td>
+        <td><button class="btn btn-ghost btn-sm edit-btn" data-id="${s.id}">Edit</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openPanel(btn.dataset.id));
+    });
+  }
+
+  // Filter listeners
+  document.getElementById('search').addEventListener('input', renderTable);
+  document.getElementById('filter-status').addEventListener('change', renderTable);
+  document.getElementById('filter-policy').addEventListener('change', renderTable);
+
+  // ── Panel ────────────────────────────────────────────────────────────────
+  const panel = document.getElementById('seller-panel');
+  const overlay = document.getElementById('panel-overlay');
+
+  function openPanel(sellerId) {
+    resetForm();
+    if (sellerId) {
+      document.getElementById('panel-title').textContent = 'Edit Seller';
+      document.getElementById('btn-delete').style.display = 'inline-block';
+      document.getElementById('channels-section').style.display = 'block';
+      populateForm(sellerId);
+      loadChannels(sellerId);
+    } else {
+      document.getElementById('panel-title').textContent = 'Add Seller';
+      document.getElementById('btn-delete').style.display = 'none';
+      document.getElementById('channels-section').style.display = 'none';
+      // Default date to today
+      document.getElementById('f-date-authorized').value = new Date().toISOString().split('T')[0];
+    }
+    panel.style.display = 'flex';
+    overlay.style.display = 'block';
+  }
+
+  function closePanel() {
+    panel.style.display = 'none';
+    overlay.style.display = 'none';
+  }
+
+  document.getElementById('btn-add').addEventListener('click', () => openPanel(null));
+  document.getElementById('panel-close').addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+
+  // ── Form state ───────────────────────────────────────────────────────────
+  let formEmails = [];
+  let formAddresses = [];
+
+  function resetForm() {
+    document.getElementById('seller-form').reset();
+    document.getElementById('seller-id').value = '';
+    formEmails = [];
+    formAddresses = [];
+    channelData = [];
+    renderEmailList();
+    renderAddressList();
+    renderChannels();
+    document.getElementById('form-error').style.display = 'none';
+    document.getElementById('email-error').style.display = 'none';
+    document.getElementById('channel-form-wrap').style.display = 'none';
+    document.getElementById('btn-add-channel').style.display = 'inline-block';
+    // uncheck all checkboxes
+    document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+  }
+
+  function populateForm(sellerId) {
+    const s = allSellers.find(x => x.id === sellerId);
+    if (!s) return;
+    document.getElementById('seller-id').value = s.id;
+    document.getElementById('f-entity-name').value = s.entity_name || '';
+    document.getElementById('f-legal-dba').value = s.legal_names_dba || '';
+    document.getElementById('f-policy').value = s.policy || '';
+    document.getElementById('f-status').value = s.authorization_status || 'Authorized';
+    document.getElementById('f-date-authorized').value = s.date_authorized || '';
+    document.getElementById('f-notes').value = s.internal_notes || '';
+
+    (s.authorized_countries || []).forEach(v => {
+      const cb = document.querySelector(`input[name=countries][value="${v}"]`);
+      if (cb) cb.checked = true;
+    });
+    (s.approved_sale_locations || []).forEach(v => {
+      const cb = document.querySelector(`input[name=locations][value="${v}"]`);
+      if (cb) cb.checked = true;
+    });
+    (s.product_categories || []).forEach(v => {
+      const cb = document.querySelector(`input[name=categories][value="${v}"]`);
+      if (cb) cb.checked = true;
+    });
+
+    formEmails = [...(s.emails || [])];
+    formAddresses = [...(s.addresses || [])];
+    renderEmailList();
+    renderAddressList();
+  }
+
+  // ── Email list ───────────────────────────────────────────────────────────
+  function renderEmailList() {
+    const el = document.getElementById('email-list');
+    el.innerHTML = formEmails.map((e, i) =>
+      `<div class="multi-item">
+        <span>${e}</span>
+        <button type="button" class="remove-btn" data-type="email" data-i="${i}">✕</button>
+      </div>`
+    ).join('');
+  }
+
+  document.getElementById('btn-add-email').addEventListener('click', () => {
+    const input = document.getElementById('email-input');
+    const val = input.value.trim();
+    const errEl = document.getElementById('email-error');
+    if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    formEmails.push(val);
+    input.value = '';
+    renderEmailList();
+  });
+
+  // ── Address list ─────────────────────────────────────────────────────────
+  function renderAddressList() {
+    const el = document.getElementById('address-list');
+    el.innerHTML = formAddresses.map((a, i) =>
+      `<div class="multi-item">
+        <span>${typeof a === 'string' ? a : a.text}</span>
+        <button type="button" class="remove-btn" data-type="address" data-i="${i}">✕</button>
+      </div>`
+    ).join('');
+  }
+
+  document.getElementById('btn-add-address').addEventListener('click', () => {
+    const input = document.getElementById('address-input');
+    const val = input.value.trim();
+    if (!val) return;
+    formAddresses.push(val);
+    input.value = '';
+    renderAddressList();
+  });
+
+  // Remove items (email or address)
+  document.getElementById('email-list').addEventListener('click', handleRemove);
+  document.getElementById('address-list').addEventListener('click', handleRemove);
+
+  function handleRemove(e) {
+    const btn = e.target.closest('.remove-btn');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.i);
+    if (btn.dataset.type === 'email') {
+      formEmails.splice(i, 1);
+      renderEmailList();
+    } else {
+      formAddresses.splice(i, 1);
+      renderAddressList();
+    }
+  }
+
+  // ── Form submit ──────────────────────────────────────────────────────────
+  document.getElementById('seller-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('form-error');
+    errEl.style.display = 'none';
+
+    const entityName = document.getElementById('f-entity-name').value.trim();
+    if (!entityName) {
+      errEl.textContent = 'Seller Entity Name is required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const payload = {
+      entity_name: entityName,
+      legal_names_dba: document.getElementById('f-legal-dba').value.trim() || null,
+      policy: document.getElementById('f-policy').value || null,
+      authorization_status: document.getElementById('f-status').value,
+      date_authorized: document.getElementById('f-date-authorized').value || null,
+      internal_notes: document.getElementById('f-notes').value.trim() || null,
+      authorized_countries: [...document.querySelectorAll('input[name=countries]:checked')].map(c => c.value),
+      approved_sale_locations: [...document.querySelectorAll('input[name=locations]:checked')].map(c => c.value),
+      product_categories: [...document.querySelectorAll('input[name=categories]:checked')].map(c => c.value),
+      emails: formEmails,
+      addresses: formAddresses,
+    };
+
+    const sellerId = document.getElementById('seller-id').value;
+    const isEdit = !!sellerId;
+
+    const res = await fetch(isEdit ? `/api/sellers/${sellerId}` : '/api/sellers', {
+      method: isEdit ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      errEl.textContent = data.error || 'An error occurred. Please try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    closePanel();
+    await loadSellers();
+  });
+
+  // ── Channel authorizations ───────────────────────────────────────────────
+  let channelData = []; // loaded when panel opens in edit mode
+
+  async function loadChannels(sellerId) {
+    const res = await fetch(`/api/sellers/${sellerId}/channels`);
+    channelData = await res.json();
+    renderChannels();
+  }
+
+  function renderChannels() {
+    const el = document.getElementById('channel-list');
+    if (channelData.length === 0) {
+      el.innerHTML = '<p class="channels-empty">No channel authorizations added yet.</p>';
+      return;
+    }
+    el.innerHTML = channelData.map(ch => {
+      const detail = ch.channel_type === 'Website'
+        ? ch.domain_name || '—'
+        : [ch.marketplace_platform, ch.seller_name, ch.seller_platform_id].filter(Boolean).join(' · ') || '—';
+      return `<div class="channel-item">
+        <div class="channel-item-body">
+          <span class="channel-type-badge">${ch.channel_type}</span>
+          <span class="channel-detail">${detail}</span>
+          <span class="channel-date">${ch.date_authorized || ''}</span>
+        </div>
+        <div class="channel-item-actions">
+          <button type="button" class="btn btn-ghost btn-sm ch-edit-btn" data-ch-id="${ch.id}">Edit</button>
+          <button type="button" class="btn btn-ghost btn-sm ch-del-btn" data-ch-id="${ch.id}">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    el.querySelectorAll('.ch-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openChannelForm(btn.dataset.chId));
+    });
+    el.querySelectorAll('.ch-del-btn').forEach(btn => {
+      btn.addEventListener('click', () => deleteChannel(btn.dataset.chId));
+    });
+  }
+
+  function openChannelForm(chId) {
+    resetChannelForm();
+    document.getElementById('channel-form-wrap').style.display = 'block';
+    document.getElementById('btn-add-channel').style.display = 'none';
+
+    if (chId) {
+      const ch = channelData.find(c => c.id === chId);
+      if (!ch) return;
+      document.getElementById('ch-id').value = ch.id;
+      document.getElementById('ch-type').value = ch.channel_type;
+      document.getElementById('ch-date').value = ch.date_authorized || '';
+      document.getElementById('ch-domain').value = ch.domain_name || '';
+      document.getElementById('ch-platform').value = ch.marketplace_platform || '';
+      document.getElementById('ch-seller-name').value = ch.seller_name || '';
+      document.getElementById('ch-seller-id').value = ch.seller_platform_id || '';
+      toggleChannelFields(ch.channel_type);
+    } else {
+      // Default date to seller's date_authorized
+      const sellerDate = document.getElementById('f-date-authorized').value;
+      document.getElementById('ch-date').value = sellerDate || new Date().toISOString().split('T')[0];
+    }
+  }
+
+  function resetChannelForm() {
+    document.getElementById('ch-id').value = '';
+    document.getElementById('ch-type').value = '';
+    document.getElementById('ch-date').value = '';
+    document.getElementById('ch-domain').value = '';
+    document.getElementById('ch-platform').value = '';
+    document.getElementById('ch-seller-name').value = '';
+    document.getElementById('ch-seller-id').value = '';
+    document.getElementById('ch-error').style.display = 'none';
+    toggleChannelFields('');
+  }
+
+  function closeChannelForm() {
+    document.getElementById('channel-form-wrap').style.display = 'none';
+    document.getElementById('btn-add-channel').style.display = 'inline-block';
+    resetChannelForm();
+  }
+
+  function toggleChannelFields(type) {
+    document.getElementById('ch-website-fields').style.display = type === 'Website' ? 'block' : 'none';
+    document.getElementById('ch-marketplace-fields').style.display = type === 'Marketplace' ? 'block' : 'none';
+  }
+
+  document.getElementById('ch-type').addEventListener('change', (e) => {
+    toggleChannelFields(e.target.value);
+  });
+
+  document.getElementById('btn-add-channel').addEventListener('click', () => openChannelForm(null));
+  document.getElementById('btn-ch-cancel').addEventListener('click', closeChannelForm);
+
+  document.getElementById('btn-ch-save').addEventListener('click', async () => {
+    const errEl = document.getElementById('ch-error');
+    errEl.style.display = 'none';
+
+    const sellerId = document.getElementById('seller-id').value;
+    const chId = document.getElementById('ch-id').value;
+    const channelType = document.getElementById('ch-type').value;
+
+    if (!channelType) {
+      errEl.textContent = 'Channel Type is required.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (channelType === 'Marketplace' && !document.getElementById('ch-platform').value) {
+      errEl.textContent = 'Marketplace Platform is required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const payload = {
+      channel_type: channelType,
+      date_authorized: document.getElementById('ch-date').value || null,
+      domain_name: document.getElementById('ch-domain').value.trim() || null,
+      marketplace_platform: document.getElementById('ch-platform').value || null,
+      seller_name: document.getElementById('ch-seller-name').value.trim() || null,
+      seller_platform_id: document.getElementById('ch-seller-id').value.trim() || null,
+    };
+
+    const isEdit = !!chId;
+    const url = isEdit ? `/api/channels/${chId}` : `/api/sellers/${sellerId}/channels`;
+    const method = isEdit ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      errEl.textContent = data.error || 'Failed to save channel.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    closeChannelForm();
+    await loadChannels(sellerId);
+  });
+
+  async function deleteChannel(chId) {
+    if (!confirm('Remove this channel authorization?')) return;
+    const sellerId = document.getElementById('seller-id').value;
+    const res = await fetch(`/api/channels/${chId}`, { method: 'DELETE' });
+    if (res.ok || res.status === 204) {
+      await loadChannels(sellerId);
+    }
+  }
+
+  // ── Delete ───────────────────────────────────────────────────────────────
+  document.getElementById('btn-delete').addEventListener('click', async () => {
+    const sellerId = document.getElementById('seller-id').value;
+    if (!sellerId) return;
+    if (!confirm('Delete this seller record? This cannot be undone.')) return;
+
+    const res = await fetch(`/api/sellers/${sellerId}`, { method: 'DELETE' });
+    if (res.ok || res.status === 204) {
+      closePanel();
+      await loadSellers();
+    } else {
+      const errEl = document.getElementById('form-error');
+      errEl.textContent = 'Delete failed. Please try again.';
+      errEl.style.display = 'block';
+    }
+  });
+</script>
+
+<style>
+  .page {
+    min-height: 100vh;
+    padding: var(--space-lg) 0 var(--space-xl);
+  }
+
+  /* ── Gate ── */
+  .gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gate-inner {
+    max-width: 360px;
+    width: 100%;
+  }
+
+  .gate-title {
+    font-size: var(--size-2xl);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    margin-bottom: var(--space-xs);
+  }
+
+  .gate-desc {
+    font-size: var(--size-sm);
+    color: var(--color-subtle);
+    margin-bottom: var(--space-md);
+    line-height: 1.6;
+  }
+
+  .gate-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .gate-input {
+    flex: 1;
+    padding: 0.6rem 0.85rem;
+    font-family: var(--font-base);
+    font-size: var(--size-sm);
+    background: transparent;
+    border: 1px solid rgba(42,39,36,0.3);
+    color: var(--color-text);
+  }
+
+  .gate-input:focus {
+    outline: none;
+    border-color: var(--accent-1);
+  }
+
+  .gate-error {
+    margin-top: 0.6rem;
+    font-size: var(--size-xs);
+    color: var(--accent-1);
+  }
+
+  /* ── Page header ── */
+  .page-nav {
+    margin-bottom: var(--space-lg);
+    font-size: var(--size-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .page-nav a { color: var(--color-subtle); }
+  .page-nav a:hover { color: var(--accent-1); }
+
+  .page-header { margin-bottom: var(--space-md); }
+
+  .page-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .page-title {
+    font-size: var(--size-2xl);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Filters ── */
+  .filters {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-input {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-base);
+    font-size: var(--size-sm);
+    background: transparent;
+    border: 1px solid rgba(42,39,36,0.25);
+    color: var(--color-text);
+  }
+
+  .filter-input:focus { outline: none; border-color: var(--accent-1); }
+
+  .filter-select {
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-base);
+    font-size: var(--size-sm);
+    background: var(--color-bg);
+    border: 1px solid rgba(42,39,36,0.25);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .filter-select:focus { outline: none; border-color: var(--accent-1); }
+
+  /* ── Table ── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid rgba(42,39,36,0.15);
+  }
+
+  .table-status {
+    padding: var(--space-md);
+    font-size: var(--size-sm);
+    color: var(--color-subtle);
+    text-align: center;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--size-sm);
+  }
+
+  thead tr {
+    border-bottom: 1px solid rgba(42,39,36,0.2);
+    background: rgba(42,39,36,0.04);
+  }
+
+  th {
+    text-align: left;
+    padding: 0.65rem 1rem;
+    font-size: var(--size-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(42,39,36,0.08);
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: rgba(42,39,36,0.03); }
+
+  .mono {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+    color: var(--color-subtle);
+  }
+
+  .name-cell { font-weight: 400; }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 0.2em 0.55em;
+    font-size: var(--size-xs);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .badge-auth {
+    background: rgba(83,125,138,0.12);
+    color: var(--accent-3);
+  }
+
+  .badge-unauth {
+    background: rgba(192,90,66,0.1);
+    color: var(--accent-1);
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    font-family: var(--font-base);
+    font-size: var(--size-sm);
+    font-weight: 400;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: none;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-1);
+    border-color: var(--accent-1);
+  }
+
+  .btn-ghost {
+    border-color: rgba(42,39,36,0.3);
+    color: var(--color-subtle);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+  }
+
+  .btn-danger {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+  }
+
+  .btn-danger:hover {
+    background: var(--accent-1);
+    color: var(--color-bg);
+  }
+
+  .btn-sm {
+    padding: 0.3rem 0.65rem;
+    font-size: var(--size-xs);
+  }
+
+  /* ── Panel overlay ── */
+  .panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(42,39,36,0.35);
+    z-index: 100;
+  }
+
+  /* ── Seller panel ── */
+  .seller-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 480px;
+    max-width: 100vw;
+    background: var(--color-bg);
+    z-index: 101;
+    flex-direction: column;
+    overflow: hidden;
+    border-left: 1px solid rgba(42,39,36,0.15);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(42,39,36,0.12);
+    flex-shrink: 0;
+  }
+
+  .panel-heading {
+    font-size: var(--size-lg);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .panel-close {
+    background: none;
+    border: none;
+    font-size: var(--size-base);
+    cursor: pointer;
+    color: var(--color-subtle);
+    padding: 0.25rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { color: var(--color-text); }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .panel-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-md);
+    margin-top: var(--space-md);
+    border-top: 1px solid rgba(42,39,36,0.12);
+  }
+
+  /* ── Form ── */
+  .form-section {
+    border: none;
+    padding: 0;
+    margin-bottom: var(--space-md);
+  }
+
+  .form-legend {
+    font-size: var(--size-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+    margin-bottom: 0.85rem;
+    display: block;
+    width: 100%;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(42,39,36,0.1);
+  }
+
+  .form-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: var(--size-sm);
+    color: var(--color-text);
+    margin-bottom: 1rem;
+  }
+
+  .form-input {
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-base);
+    font-size: var(--size-sm);
+    background: transparent;
+    border: 1px solid rgba(42,39,36,0.25);
+    color: var(--color-text);
+    width: 100%;
+  }
+
+  .form-input:focus { outline: none; border-color: var(--accent-1); }
+
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .required { color: var(--accent-1); }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+  }
+
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--size-sm);
+    cursor: pointer;
+  }
+
+  /* ── Multi-item lists ── */
+  .multi-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .multi-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.6rem;
+    background: rgba(42,39,36,0.05);
+    font-size: var(--size-sm);
+    gap: 0.5rem;
+  }
+
+  .multi-item span { flex: 1; word-break: break-all; }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: var(--color-subtle);
+    padding: 0.15rem 0.3rem;
+    flex-shrink: 0;
+  }
+
+  .remove-btn:hover { color: var(--accent-1); }
+
+  .email-add-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .email-add-row .form-input { flex: 1; }
+
+  .field-error, .form-error {
+    font-size: var(--size-xs);
+    color: var(--accent-1);
+    margin-top: 0.3rem;
+  }
+
+  .form-error {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(192,90,66,0.3);
+    background: rgba(192,90,66,0.06);
+    margin-top: var(--space-sm);
+  }
+
+  /* ── Channel authorizations ── */
+  .channels-hint {
+    font-size: var(--size-xs);
+    color: var(--color-subtle);
+    margin-bottom: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .channels-empty {
+    font-size: var(--size-xs);
+    color: var(--color-subtle);
+    margin-bottom: 0.75rem;
+  }
+
+  .channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(42,39,36,0.12);
+    gap: 0.5rem;
+  }
+
+  .channel-item-body {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .channel-type-badge {
+    font-size: var(--size-xs);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--accent-2);
+    flex-shrink: 0;
+  }
+
+  .channel-detail {
+    font-size: var(--size-xs);
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .channel-date {
+    font-size: var(--size-xs);
+    color: var(--color-subtle);
+    flex-shrink: 0;
+  }
+
+  .channel-item-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .channel-form-wrap {
+    margin-top: 0.85rem;
+    padding: 1rem;
+    border: 1px solid rgba(42,39,36,0.15);
+    background: rgba(42,39,36,0.02);
+  }
+
+  .ch-form-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .ch-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .seller-panel { width: 100vw; }
+    .page-header-row { flex-direction: column; align-items: flex-start; }
+    .filters { flex-direction: column; }
+    .filter-input { min-width: unset; width: 100%; }
+    .ch-form-row { flex-direction: column; }
+  }
+</style>
