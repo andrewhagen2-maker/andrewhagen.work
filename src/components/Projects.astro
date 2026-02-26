@@ -1,5 +1,5 @@
 ---
-// Projects.astro — Phase 3
+// Projects.astro
 import ProjectCard from "./ProjectCard.astro";
 
 const projects = [
@@ -12,10 +12,12 @@ const projects = [
     status: "live" as const,
   },
   {
-    title: "Coming Soon",
-    description: "A second tool in development — details to follow.",
-    tags: [],
-    status: "coming-soon" as const,
+    title: "QR Distribution Tracking Tool",
+    description:
+      "Proof-of-concept covert shipment tracking — QR codes encode distributor identity, log scan events silently, and redirect to any destination URL.",
+    tags: ["JavaScript", "Vercel", "Google Sheets API", "Distribution Compliance"],
+    url: "https://andrewhagen.work/qr-generator",
+    status: "live" as const,
   },
   {
     title: "Coming Soon",
@@ -31,6 +33,26 @@ const projects = [
     <p class="section-label">Projects</p>
     <div class="grid">
       {projects.map((p) => <ProjectCard {...p} />)}
+    </div>
+
+    <div class="project-explainers">
+      <div class="explainer">
+        <p class="explainer-title">Brand Channel Intelligence Dashboard</p>
+        <p class="explainer-body">
+          Pulls live offer data for monitored ASINs via the Keepa API on a daily GitHub Action schedule.
+          Data is written to an append-only snapshot file — the dashboard reads from that cache only,
+          never hitting the API directly. Real data, automated pipeline, read-only front end.
+        </p>
+      </div>
+      <div class="explainer">
+        <p class="explainer-title">QR Distribution Tracking Tool</p>
+        <p class="explainer-body">
+          Each generated code is a random 6-character ID — the QR URL reveals nothing about the distributor.
+          On scan, a serverless function logs the timestamp, device, and country to a private Google Sheet,
+          then silently redirects. The distributor sees only a product page. Scan log viewable on the
+          <a href="/qr-dashboard">dashboard</a>.
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -63,5 +85,39 @@ const projects = [
     .grid {
       grid-template-columns: 1fr 1fr 1fr;
     }
+  }
+
+  /* Project explainers — below the card grid */
+  .project-explainers {
+    margin-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 680px;
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(42, 39, 36, 0.2);
+  }
+
+  .explainer-title {
+    font-size: var(--size-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+
+  .explainer-body {
+    font-size: var(--size-sm);
+    color: var(--color-subtle);
+    line-height: 1.75;
+  }
+
+  .explainer-body a {
+    color: var(--accent-1);
+  }
+
+  .explainer-body a:hover {
+    color: var(--color-text);
   }
 </style>
