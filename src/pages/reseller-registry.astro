@@ -11,80 +11,62 @@ import '../styles/global.css';
   <main class="page">
     <div class="container">
 
-      <!-- Password gate -->
-      <div id="gate" class="gate">
-        <div class="gate-inner">
-          <p class="section-label">Authorized Access</p>
-          <h1 class="gate-title">Reseller Registry</h1>
-          <p class="gate-desc">Enter the admin password to access the authorized seller network.</p>
-          <form id="gate-form" class="gate-form">
-            <input
-              id="gate-input"
-              type="password"
-              placeholder="Password"
-              autocomplete="current-password"
-              class="gate-input"
-            />
-            <button type="submit" class="btn btn-primary">Enter</button>
-          </form>
-          <p id="gate-error" class="gate-error" style="display:none">Incorrect password.</p>
+      <nav class="page-nav">
+        <a href="/">← andrewhagen.work</a>
+      </nav>
+
+      <header class="page-header">
+        <div class="page-header-row">
+          <div>
+            <p class="section-label">Distribution Compliance Tool</p>
+            <h1 class="page-title">Authorized Seller Registry</h1>
+          </div>
+          <button id="btn-add" class="btn btn-primary">+ Add Seller</button>
         </div>
+      </header>
+
+      <!-- Filters -->
+      <div class="filters">
+        <input id="search" type="search" placeholder="Search by name or email…" class="filter-input" />
+        <select id="filter-status" class="filter-select">
+          <option value="">All Statuses</option>
+          <option value="Authorized">Authorized</option>
+          <option value="Unauthorized">Unauthorized</option>
+        </select>
+        <select id="filter-policy" class="filter-select">
+          <option value="">All Policies</option>
+          <option value="Authorized Reseller">Authorized Reseller</option>
+          <option value="Authorized Retailer">Authorized Retailer</option>
+        </select>
+        <select id="filter-channel" class="filter-select">
+          <option value="">All Channels</option>
+          <option value="Marketplace">Marketplace</option>
+          <option value="Website">Website</option>
+          <option value="none">No Channels</option>
+        </select>
       </div>
 
-      <!-- Registry UI (hidden until authenticated) -->
-      <div id="registry" style="display:none">
+      <!-- Table -->
+      <div class="table-wrap">
+        <div id="loading" class="table-status">Loading…</div>
+        <div id="empty" class="table-status" style="display:none">No records match.</div>
+        <table id="seller-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Account ID</th>
+              <th>Entity Name</th>
+              <th>Status</th>
+              <th>Policy</th>
+              <th>Countries</th>
+              <th>Channels</th>
+              <th>Date Authorized</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="seller-tbody"></tbody>
+        </table>
+      </div>
 
-        <nav class="page-nav">
-          <a href="/">← andrewhagen.work</a>
-        </nav>
-
-        <header class="page-header">
-          <div class="page-header-row">
-            <div>
-              <p class="section-label">Distribution Compliance Tool</p>
-              <h1 class="page-title">Authorized Seller Registry</h1>
-            </div>
-            <button id="btn-add" class="btn btn-primary">+ Add Seller</button>
-          </div>
-        </header>
-
-        <!-- Filters -->
-        <div class="filters">
-          <input id="search" type="search" placeholder="Search by name or email…" class="filter-input" />
-          <select id="filter-status" class="filter-select">
-            <option value="">All Statuses</option>
-            <option value="Authorized">Authorized</option>
-            <option value="Unauthorized">Unauthorized</option>
-          </select>
-          <select id="filter-policy" class="filter-select">
-            <option value="">All Policies</option>
-            <option value="Authorized Reseller">Authorized Reseller</option>
-            <option value="Authorized Retailer">Authorized Retailer</option>
-          </select>
-          <button id="btn-logout" class="btn btn-ghost">Log out</button>
-        </div>
-
-        <!-- Table -->
-        <div class="table-wrap">
-          <div id="loading" class="table-status">Loading…</div>
-          <div id="empty" class="table-status" style="display:none">No records match.</div>
-          <table id="seller-table" style="display:none">
-            <thead>
-              <tr>
-                <th>Account ID</th>
-                <th>Entity Name</th>
-                <th>Status</th>
-                <th>Policy</th>
-                <th>Countries</th>
-                <th>Date Authorized</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="seller-tbody"></tbody>
-          </table>
-        </div>
-
-      </div><!-- /registry -->
     </div><!-- /container -->
   </main>
 
@@ -262,7 +244,21 @@ import '../styles/global.css';
         <div id="form-error" class="form-error" style="display:none"></div>
 
         <div class="panel-footer">
-          <button type="button" id="btn-delete" class="btn btn-danger" style="display:none">Delete Seller</button>
+          <!-- Delete flow: button → inline password prompt → confirm -->
+          <div id="delete-flow" style="display:none">
+            <div id="delete-btn-wrap">
+              <button type="button" id="btn-delete" class="btn btn-danger">Delete Seller</button>
+            </div>
+            <div id="delete-confirm-wrap" class="delete-confirm-wrap" style="display:none">
+              <p class="delete-confirm-label">Enter admin password to confirm deletion:</p>
+              <div class="delete-confirm-row">
+                <input type="password" id="delete-pw-input" class="form-input delete-pw-input" placeholder="Password" />
+                <button type="button" id="btn-delete-confirm" class="btn btn-danger btn-sm">Confirm</button>
+                <button type="button" id="btn-delete-cancel" class="btn btn-ghost btn-sm">Cancel</button>
+              </div>
+              <p id="delete-pw-error" class="field-error" style="display:none">Incorrect password.</p>
+            </div>
+          </div>
           <button type="submit" class="btn btn-primary" id="btn-save">Save</button>
         </div>
       </form>
@@ -271,43 +267,8 @@ import '../styles/global.css';
 </Base>
 
 <script>
-  // ── Auth ────────────────────────────────────────────────────────────────
-  const STORAGE_KEY = 'rr_auth';
-
-  function isAuthed() {
-    return sessionStorage.getItem(STORAGE_KEY) === '1';
-  }
-
-  function showRegistry() {
-    document.getElementById('gate').style.display = 'none';
-    document.getElementById('registry').style.display = 'block';
-    loadSellers();
-  }
-
-  if (isAuthed()) showRegistry();
-
-  document.getElementById('gate-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const pw = document.getElementById('gate-input').value;
-    const res = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
-    });
-    if (res.ok) {
-      sessionStorage.setItem(STORAGE_KEY, '1');
-      showRegistry();
-    } else {
-      document.getElementById('gate-error').style.display = 'block';
-    }
-  });
-
-  document.getElementById('btn-logout').addEventListener('click', () => {
-    sessionStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  });
-
-  // ── Sellers data ─────────────────────────────────────────────────────────
+  // ── Sellers data ──────────────────────────────────────────────────────────
+  // allSellers stores seller records; channel data is embedded via channel_authorizations
   let allSellers = [];
 
   async function loadSellers() {
@@ -316,7 +277,16 @@ import '../styles/global.css';
     document.getElementById('empty').style.display = 'none';
 
     const res = await fetch('/api/sellers');
-    allSellers = await res.json();
+    const sellers = await res.json();
+
+    // Load all channel authorizations for each seller in parallel
+    const withChannels = await Promise.all(sellers.map(async (s) => {
+      const chRes = await fetch(`/api/sellers/${s.id}/channels`);
+      const channels = chRes.ok ? await chRes.json() : [];
+      return { ...s, _channels: channels };
+    }));
+
+    allSellers = withChannels;
     renderTable();
   }
 
@@ -324,6 +294,7 @@ import '../styles/global.css';
     const search = document.getElementById('search').value.toLowerCase();
     const status = document.getElementById('filter-status').value;
     const policy = document.getElementById('filter-policy').value;
+    const channel = document.getElementById('filter-channel').value;
 
     let rows = allSellers.filter(s => {
       const matchSearch = !search ||
@@ -331,7 +302,15 @@ import '../styles/global.css';
         (s.emails || []).some(e => e.toLowerCase().includes(search));
       const matchStatus = !status || s.authorization_status === status;
       const matchPolicy = !policy || s.policy === policy;
-      return matchSearch && matchStatus && matchPolicy;
+
+      let matchChannel = true;
+      if (channel === 'none') {
+        matchChannel = (s._channels || []).length === 0;
+      } else if (channel) {
+        matchChannel = (s._channels || []).some(ch => ch.channel_type === channel);
+      }
+
+      return matchSearch && matchStatus && matchPolicy && matchChannel;
     });
 
     document.getElementById('loading').style.display = 'none';
@@ -349,6 +328,18 @@ import '../styles/global.css';
     document.getElementById('seller-table').style.display = 'table';
 
     rows.forEach(s => {
+      const channels = s._channels || [];
+      let channelHtml = '—';
+      if (channels.length > 0) {
+        channelHtml = channels.map(ch => {
+          const label = ch.channel_type === 'Marketplace'
+            ? (ch.marketplace_platform || 'Marketplace')
+            : (ch.domain_name || 'Website');
+          const cls = ch.channel_type === 'Marketplace' ? 'ch-badge-mkt' : 'ch-badge-web';
+          return `<span class="ch-badge ${cls}">${label}</span>`;
+        }).join(' ');
+      }
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="mono">${s.account_id || '—'}</td>
@@ -356,6 +347,7 @@ import '../styles/global.css';
         <td><span class="badge badge-${s.authorization_status === 'Authorized' ? 'auth' : 'unauth'}">${s.authorization_status}</span></td>
         <td>${s.policy || '—'}</td>
         <td>${(s.authorized_countries || []).join(', ') || '—'}</td>
+        <td class="channel-cell">${channelHtml}</td>
         <td>${s.date_authorized || '—'}</td>
         <td><button class="btn btn-ghost btn-sm edit-btn" data-id="${s.id}">Edit</button></td>
       `;
@@ -371,6 +363,10 @@ import '../styles/global.css';
   document.getElementById('search').addEventListener('input', renderTable);
   document.getElementById('filter-status').addEventListener('change', renderTable);
   document.getElementById('filter-policy').addEventListener('change', renderTable);
+  document.getElementById('filter-channel').addEventListener('change', renderTable);
+
+  // Load on page ready
+  loadSellers();
 
   // ── Panel ────────────────────────────────────────────────────────────────
   const panel = document.getElementById('seller-panel');
@@ -380,15 +376,14 @@ import '../styles/global.css';
     resetForm();
     if (sellerId) {
       document.getElementById('panel-title').textContent = 'Edit Seller';
-      document.getElementById('btn-delete').style.display = 'inline-block';
+      document.getElementById('delete-flow').style.display = 'block';
       document.getElementById('channels-section').style.display = 'block';
       populateForm(sellerId);
       loadChannels(sellerId);
     } else {
       document.getElementById('panel-title').textContent = 'Add Seller';
-      document.getElementById('btn-delete').style.display = 'none';
+      document.getElementById('delete-flow').style.display = 'none';
       document.getElementById('channels-section').style.display = 'none';
-      // Default date to today
       document.getElementById('f-date-authorized').value = new Date().toISOString().split('T')[0];
     }
     panel.style.display = 'flex';
@@ -421,7 +416,11 @@ import '../styles/global.css';
     document.getElementById('email-error').style.display = 'none';
     document.getElementById('channel-form-wrap').style.display = 'none';
     document.getElementById('btn-add-channel').style.display = 'inline-block';
-    // uncheck all checkboxes
+    // Reset delete flow
+    document.getElementById('delete-btn-wrap').style.display = 'block';
+    document.getElementById('delete-confirm-wrap').style.display = 'none';
+    document.getElementById('delete-pw-input').value = '';
+    document.getElementById('delete-pw-error').style.display = 'none';
     document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
   }
 
@@ -500,7 +499,6 @@ import '../styles/global.css';
     renderAddressList();
   });
 
-  // Remove items (email or address)
   document.getElementById('email-list').addEventListener('click', handleRemove);
   document.getElementById('address-list').addEventListener('click', handleRemove);
 
@@ -564,8 +562,51 @@ import '../styles/global.css';
     await loadSellers();
   });
 
+  // ── Delete flow (inline password prompt) ─────────────────────────────────
+  document.getElementById('btn-delete').addEventListener('click', () => {
+    document.getElementById('delete-btn-wrap').style.display = 'none';
+    document.getElementById('delete-confirm-wrap').style.display = 'block';
+    document.getElementById('delete-pw-input').focus();
+  });
+
+  document.getElementById('btn-delete-cancel').addEventListener('click', () => {
+    document.getElementById('delete-btn-wrap').style.display = 'block';
+    document.getElementById('delete-confirm-wrap').style.display = 'none';
+    document.getElementById('delete-pw-input').value = '';
+    document.getElementById('delete-pw-error').style.display = 'none';
+  });
+
+  document.getElementById('btn-delete-confirm').addEventListener('click', async () => {
+    const pw = document.getElementById('delete-pw-input').value;
+    const errEl = document.getElementById('delete-pw-error');
+    errEl.style.display = 'none';
+
+    // Verify password first
+    const authRes = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+
+    if (!authRes.ok) {
+      errEl.style.display = 'block';
+      document.getElementById('delete-pw-input').value = '';
+      return;
+    }
+
+    const sellerId = document.getElementById('seller-id').value;
+    const res = await fetch(`/api/sellers/${sellerId}`, { method: 'DELETE' });
+    if (res.ok || res.status === 204) {
+      closePanel();
+      await loadSellers();
+    } else {
+      errEl.textContent = 'Delete failed. Please try again.';
+      errEl.style.display = 'block';
+    }
+  });
+
   // ── Channel authorizations ───────────────────────────────────────────────
-  let channelData = []; // loaded when panel opens in edit mode
+  let channelData = [];
 
   async function loadChannels(sellerId) {
     const res = await fetch(`/api/sellers/${sellerId}/channels`);
@@ -621,7 +662,6 @@ import '../styles/global.css';
       document.getElementById('ch-seller-id').value = ch.seller_platform_id || '';
       toggleChannelFields(ch.channel_type);
     } else {
-      // Default date to seller's date_authorized
       const sellerDate = document.getElementById('f-date-authorized').value;
       document.getElementById('ch-date').value = sellerDate || new Date().toISOString().split('T')[0];
     }
@@ -714,83 +754,12 @@ import '../styles/global.css';
       await loadChannels(sellerId);
     }
   }
-
-  // ── Delete ───────────────────────────────────────────────────────────────
-  document.getElementById('btn-delete').addEventListener('click', async () => {
-    const sellerId = document.getElementById('seller-id').value;
-    if (!sellerId) return;
-    if (!confirm('Delete this seller record? This cannot be undone.')) return;
-
-    const res = await fetch(`/api/sellers/${sellerId}`, { method: 'DELETE' });
-    if (res.ok || res.status === 204) {
-      closePanel();
-      await loadSellers();
-    } else {
-      const errEl = document.getElementById('form-error');
-      errEl.textContent = 'Delete failed. Please try again.';
-      errEl.style.display = 'block';
-    }
-  });
 </script>
 
 <style>
   .page {
     min-height: 100vh;
     padding: var(--space-lg) 0 var(--space-xl);
-  }
-
-  /* ── Gate ── */
-  .gate {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .gate-inner {
-    max-width: 360px;
-    width: 100%;
-  }
-
-  .gate-title {
-    font-size: var(--size-2xl);
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    margin-bottom: var(--space-xs);
-  }
-
-  .gate-desc {
-    font-size: var(--size-sm);
-    color: var(--color-subtle);
-    margin-bottom: var(--space-md);
-    line-height: 1.6;
-  }
-
-  .gate-form {
-    display: flex;
-    gap: 0.75rem;
-    align-items: stretch;
-  }
-
-  .gate-input {
-    flex: 1;
-    padding: 0.6rem 0.85rem;
-    font-family: var(--font-base);
-    font-size: var(--size-sm);
-    background: transparent;
-    border: 1px solid rgba(42,39,36,0.3);
-    color: var(--color-text);
-  }
-
-  .gate-input:focus {
-    outline: none;
-    border-color: var(--accent-1);
-  }
-
-  .gate-error {
-    margin-top: 0.6rem;
-    font-size: var(--size-xs);
-    color: var(--accent-1);
   }
 
   /* ── Page header ── */
@@ -896,7 +865,6 @@ import '../styles/global.css';
   }
 
   tbody tr:last-child td { border-bottom: none; }
-
   tbody tr:hover { background: rgba(42,39,36,0.03); }
 
   .mono {
@@ -907,7 +875,36 @@ import '../styles/global.css';
 
   .name-cell { font-weight: 400; }
 
-  /* ── Badges ── */
+  .channel-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    align-items: center;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* ── Channel badges (table) ── */
+  .ch-badge {
+    display: inline-block;
+    padding: 0.15em 0.45em;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ch-badge-mkt {
+    background: rgba(138,122,158,0.12);
+    color: var(--accent-2);
+  }
+
+  .ch-badge-web {
+    background: rgba(83,125,138,0.12);
+    color: var(--accent-3);
+  }
+
+  /* ── Status badges ── */
   .badge {
     display: inline-block;
     padding: 0.2em 0.55em;
@@ -1036,10 +1033,36 @@ import '../styles/global.css';
   .panel-footer {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding-top: var(--space-md);
     margin-top: var(--space-md);
     border-top: 1px solid rgba(42,39,36,0.12);
+  }
+
+  /* ── Delete confirm ── */
+  .delete-confirm-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 260px;
+  }
+
+  .delete-confirm-label {
+    font-size: var(--size-xs);
+    color: var(--accent-1);
+  }
+
+  .delete-confirm-row {
+    display: flex;
+    gap: 0.4rem;
+    align-items: stretch;
+  }
+
+  .delete-pw-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.3rem 0.5rem !important;
+    font-size: var(--size-xs) !important;
   }
 
   /* ── Form ── */
@@ -1154,7 +1177,7 @@ import '../styles/global.css';
     margin-top: var(--space-sm);
   }
 
-  /* ── Channel authorizations ── */
+  /* ── Channel authorizations (panel) ── */
   .channels-hint {
     font-size: var(--size-xs);
     color: var(--color-subtle);
@@ -1247,5 +1270,6 @@ import '../styles/global.css';
     .filters { flex-direction: column; }
     .filter-input { min-width: unset; width: 100%; }
     .ch-form-row { flex-direction: column; }
+    .delete-confirm-wrap { max-width: 100%; }
   }
 </style>
