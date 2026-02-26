@@ -62,46 +62,15 @@
       <canvas id="qr-canvas"></canvas>
     </div>
 
-    <!-- Editable label text for print -->
-    <div class="label-edit">
-      <div class="field">
-        <label class="field-label" for="label-above">Label text — above QR</label>
-        <input
-          class="field-input"
-          type="text"
-          id="label-above"
-          value="Scan to verify authenticity"
-        />
-      </div>
-      <div class="field">
-        <label class="field-label" for="label-below">Label text — below QR <span class="field-optional">(optional)</span></label>
-        <input
-          class="field-input"
-          type="text"
-          id="label-below"
-          placeholder="Leave blank to omit"
-        />
-      </div>
-    </div>
-
     <!-- Actions -->
     <div class="output-actions">
       <button class="btn" id="download-btn" type="button">Download PNG</button>
-      <button class="btn btn--secondary" id="print-btn" type="button">Print labels</button>
     </div>
 
     <!-- Generate another -->
     <button class="btn btn--ghost" id="reset-btn" type="button">← Generate another code</button>
   </div>
 
-</div>
-
-<!-- Print area — outside generator div, direct child of body via slot.
-     Hidden on screen, only shown during print via @media print -->
-<div class="print-area" id="print-area" aria-hidden="true">
-  <p class="print-label-above" id="print-label-above"></p>
-  <img class="print-qr" id="print-qr" src="" alt="QR code" />
-  <p class="print-label-below" id="print-label-below"></p>
 </div>
 
 <script>
@@ -114,14 +83,7 @@
   const outputMeta = document.getElementById('output-meta');
   const canvas = document.getElementById('qr-canvas');
   const downloadBtn = document.getElementById('download-btn');
-  const printBtn = document.getElementById('print-btn');
   const resetBtn = document.getElementById('reset-btn');
-  const labelAbove = document.getElementById('label-above');
-  const labelBelow = document.getElementById('label-below');
-  const printArea = document.getElementById('print-area');
-  const printLabelAbove = document.getElementById('print-label-above');
-  const printLabelBelow = document.getElementById('print-label-below');
-  const printQr = document.getElementById('print-qr');
 
   let currentQrUrl = '';
   let currentDistributor = '';
@@ -184,30 +146,6 @@
     link.download = `qr-${currentDistributor.replace(/\s+/g, '-').toLowerCase()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-  });
-
-  // Print — populate print area then trigger browser print
-  printBtn.addEventListener('click', async () => {
-    const above = labelAbove.value.trim();
-    const below = labelBelow.value.trim();
-
-    printLabelAbove.textContent = above;
-    printLabelAbove.style.display = above ? '' : 'none';
-
-    printLabelBelow.textContent = below;
-    printLabelBelow.style.display = below ? '' : 'none';
-
-    // Render a high-res version for print
-    const printCanvas = document.createElement('canvas');
-    await QRCode.toCanvas(printCanvas, currentQrUrl, {
-      width: 600,
-      margin: 2,
-      color: { dark: '#2A2724', light: '#F0EAE0' },
-    });
-    printQr.src = printCanvas.toDataURL('image/png');
-
-    // Small delay to let the image load before print dialog
-    setTimeout(() => window.print(), 100);
   });
 
   // Reset — show form again
@@ -369,13 +307,6 @@
     display: block;
   }
 
-  .label-edit {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-md);
-  }
-
   .output-actions {
     display: flex;
     gap: var(--space-sm);
@@ -383,45 +314,4 @@
     margin-bottom: var(--space-md);
   }
 
-  /* Print area — hidden on screen, shown only during print */
-  .print-area {
-    display: none;
-  }
-
-  /* ============================================
-     PRINT STYLES
-     ============================================ */
-  @media print {
-    /* Hide the main page, show only the print area */
-    main,
-    nav,
-    header,
-    footer {
-      display: none !important;
-    }
-
-    .print-area {
-      display: flex !important;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'DM Sans', sans-serif;
-      color: #2A2724;
-      gap: 0.5rem;
-      padding: 1rem;
-      width: 100%;
-    }
-
-    .print-label-above,
-    .print-label-below {
-      font-size: 11pt;
-      letter-spacing: 0.05em;
-      text-align: center;
-    }
-
-    .print-qr {
-      width: 2in;
-      height: 2in;
-    }
-  }
 </style>
