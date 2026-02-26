@@ -20,10 +20,12 @@ const projects = [
     status: "live" as const,
   },
   {
-    title: "Coming Soon",
-    description: "A third project in progress across distribution compliance and enforcement workflows.",
-    tags: [],
-    status: "coming-soon" as const,
+    title: "Authorized Seller Registry",
+    description:
+      "CRUD admin interface for managing an authorized retailer and reseller network — tracks entities, agreements, approved channels, and marketplace seller IDs.",
+    tags: ["JavaScript", "Supabase", "Vercel", "Distribution Compliance"],
+    url: "https://andrewhagen.work/reseller-registry",
+    status: "live" as const,
   },
 ];
 ---
@@ -51,6 +53,15 @@ const projects = [
           On scan, a serverless function logs the timestamp, device, and country to a private Google Sheet,
           then silently redirects. The distributor sees only a product page. Scan log viewable on the
           <a href="/qr-dashboard">dashboard</a>.
+        </p>
+      </div>
+      <div class="explainer">
+        <p class="explainer-title">Authorized Seller Registry</p>
+        <p class="explainer-body">
+          A working admin tool backed by a Postgres database (Supabase). Seller records store agreement type,
+          authorized countries, approved sale locations, and contact details. Each record supports child
+          channel authorizations — website domains or marketplace platform accounts (Amazon, eBay, Walmart)
+          with their own authorization dates and seller IDs. Open to view and edit; deletion is password-protected.
         </p>
       </div>
     </div>
