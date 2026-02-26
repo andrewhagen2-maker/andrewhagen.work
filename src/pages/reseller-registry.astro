@@ -9,7 +9,7 @@ import '../styles/global.css';
   description="Authorized seller network admin tool."
 >
   <main class="page">
-    <div class="container">
+    <div class="container wide-container">
 
       <nav class="page-nav">
         <a href="/">← andrewhagen.work</a>
@@ -331,13 +331,14 @@ import '../styles/global.css';
       const channels = s._channels || [];
       let channelHtml = '—';
       if (channels.length > 0) {
-        channelHtml = channels.map(ch => {
+        const badges = channels.map(ch => {
           const label = ch.channel_type === 'Marketplace'
             ? (ch.marketplace_platform || 'Marketplace')
             : (ch.domain_name || 'Website');
           const cls = ch.channel_type === 'Marketplace' ? 'ch-badge-mkt' : 'ch-badge-web';
           return `<span class="ch-badge ${cls}">${label}</span>`;
-        }).join(' ');
+        }).join('');
+        channelHtml = `<div class="channel-cell-inner">${badges}</div>`;
       }
 
       const tr = document.createElement('tr');
@@ -347,7 +348,7 @@ import '../styles/global.css';
         <td><span class="badge badge-${s.authorization_status === 'Authorized' ? 'auth' : 'unauth'}">${s.authorization_status}</span></td>
         <td>${s.policy || '—'}</td>
         <td>${(s.authorized_countries || []).join(', ') || '—'}</td>
-        <td class="channel-cell">${channelHtml}</td>
+        <td>${channelHtml}</td>
         <td>${s.date_authorized || '—'}</td>
         <td><button class="btn btn-ghost btn-sm edit-btn" data-id="${s.id}">Edit</button></td>
       `;
@@ -762,6 +763,11 @@ import '../styles/global.css';
     padding: var(--space-lg) 0 var(--space-xl);
   }
 
+  /* ── Wide container override ── */
+  .wide-container {
+    max-width: 1300px;
+  }
+
   /* ── Page header ── */
   .page-nav {
     margin-bottom: var(--space-lg);
@@ -826,7 +832,7 @@ import '../styles/global.css';
   /* ── Table ── */
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid rgba(42,39,36,0.15);
+    border: 1px solid rgba(42,39,36,0.18);
   }
 
   .table-status {
@@ -843,7 +849,7 @@ import '../styles/global.css';
   }
 
   thead tr {
-    border-bottom: 1px solid rgba(42,39,36,0.2);
+    border-bottom: 2px solid rgba(42,39,36,0.2);
     background: rgba(42,39,36,0.04);
   }
 
@@ -859,9 +865,10 @@ import '../styles/global.css';
   }
 
   td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(42,39,36,0.08);
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid rgba(42,39,36,0.12);
     vertical-align: middle;
+    white-space: nowrap;
   }
 
   tbody tr:last-child td { border-bottom: none; }
@@ -873,15 +880,21 @@ import '../styles/global.css';
     color: var(--color-subtle);
   }
 
-  .name-cell { font-weight: 400; }
+  .name-cell {
+    font-weight: 400;
+    white-space: nowrap;
+  }
 
   .channel-cell {
+    display: table-cell;
+    white-space: nowrap;
+  }
+
+  .channel-cell-inner {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.3rem;
     align-items: center;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
   }
 
   /* ── Channel badges (table) ── */
