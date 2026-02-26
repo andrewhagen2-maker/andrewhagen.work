@@ -94,13 +94,14 @@
     <button class="btn btn--ghost" id="reset-btn" type="button">← Generate another code</button>
   </div>
 
-  <!-- Print area — only visible during print -->
-  <div class="print-area" id="print-area" aria-hidden="true">
-    <p class="print-label-above" id="print-label-above"></p>
-    <img class="print-qr" id="print-qr" src="" alt="QR code" />
-    <p class="print-label-below" id="print-label-below"></p>
-  </div>
+</div>
 
+<!-- Print area — outside generator div, direct child of body via slot.
+     Hidden on screen, only shown during print via @media print -->
+<div class="print-area" id="print-area" aria-hidden="true">
+  <p class="print-label-above" id="print-label-above"></p>
+  <img class="print-qr" id="print-qr" src="" alt="QR code" />
+  <p class="print-label-below" id="print-label-below"></p>
 </div>
 
 <script>
@@ -171,6 +172,8 @@
 
     outputMeta.textContent = `Code ${data.code_id} · ${distributor} · redirects to ${destination_url}`;
 
+    submitBtn.textContent = 'Code Generated';
+    submitBtn.disabled = false;
     form.hidden = true;
     output.hidden = false;
   });
@@ -389,8 +392,11 @@
      PRINT STYLES
      ============================================ */
   @media print {
-    /* Hide everything except print area */
-    body > * {
+    /* Hide the main page, show only the print area */
+    main,
+    nav,
+    header,
+    footer {
       display: none !important;
     }
 
@@ -399,10 +405,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: var(--font-base), sans-serif;
+      font-family: 'DM Sans', sans-serif;
       color: #2A2724;
       gap: 0.5rem;
       padding: 1rem;
+      width: 100%;
     }
 
     .print-label-above,
