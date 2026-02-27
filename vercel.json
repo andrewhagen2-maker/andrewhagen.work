@@ -11,5 +11,17 @@
       "destination": "https://dashboard-ra4y8jaxetweo6u9gdqg86.streamlit.app",
       "permanent": false
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "game.andrewhagen.work"
+        }
+      ],
+      "destination": "/game/$1"
+    }
   ]
 }
