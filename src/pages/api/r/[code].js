@@ -26,22 +26,19 @@ export async function GET({ params, request }) {
     });
   }
 
-  // Log the scan — await so write completes before redirect
-  // Adds ~500ms to redirect but guarantees the row is written
+  // Log the scan fire-and-forget — redirect immediately, write in background.
+  // Awaiting the Sheets write caused timeouts on cold-start serverless invocations.
   const user_agent = headers.get('user-agent') || '';
   const country = headers.get('x-vercel-ip-country') || '';
 
-  try {
-    await writeScan({
-      code_id: entry.code_id,
-      distributor: entry.distributor,
-      user_agent,
-      country,
-    });
-  } catch (err) {
-    // Log failure but still redirect — scan logging is non-blocking for the user
+  writeScan({
+    code_id: entry.code_id,
+    distributor: entry.distributor,
+    user_agent,
+    country,
+  }).catch((err) => {
     console.error('Sheets writeScan error:', err);
-  }
+  });
 
   return new Response(null, {
     status: 302,

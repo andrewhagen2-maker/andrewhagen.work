@@ -1,0 +1,90 @@
+---
+// Brands.astro — "Brands I've worked with" logo row
+
+const brands = [
+  { name: "Nintendo",   file: "nintendo.svg"    },
+  { name: "Victorinox", file: "victorinox.svg"  },
+  { name: "Chanel",     file: "chanel.svg"      },
+  { name: "Louis Vuitton", file: "louisvuitton.svg" },
+  { name: "TOMS",       file: "toms.svg"        },
+  { name: "Epicurean",  file: "epicurean.svg"   },
+];
+---
+
+<section id="brands">
+  <div class="brands-inner container">
+    <p class="section-label">Brands I've worked with</p>
+    <div class="logo-row">
+      {brands.map((b) => (
+        <div class="logo-slot">
+          <img
+            src={`/logos/${b.file}`}
+            alt={b.name}
+            width="160"
+            height="60"
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  #brands {
+    padding-top: var(--space-sm);
+    padding-bottom: var(--space-sm);
+  }
+
+  .brands-inner {
+    max-width: 1100px;
+  }
+
+  .section-label {
+    font-size: var(--size-xs);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-subtle);
+    margin-bottom: var(--space-md);
+  }
+
+  .logo-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-lg);
+    row-gap: var(--space-md);
+  }
+
+  .logo-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .logo-slot img {
+    height: 36px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+    /* Normalize all logos to the same muted charcoal tone */
+    filter: opacity(0.55) grayscale(1) contrast(1.2);
+    transition: filter 0.2s ease;
+    display: block;
+  }
+
+  .logo-slot img:hover {
+    filter: opacity(0.85) grayscale(0.6) contrast(1.1);
+  }
+
+  @media (max-width: 640px) {
+    .logo-row {
+      gap: var(--space-md);
+    }
+
+    .logo-slot img {
+      height: 28px;
+    }
+  }
+</style>
