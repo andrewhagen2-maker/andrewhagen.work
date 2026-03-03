@@ -4,6 +4,14 @@ import ProjectCard from "./ProjectCard.astro";
 
 const projects = [
   {
+    title: "CaseGraph",
+    description:
+      "Browser-based link analysis tool for mapping entity relationships and building evidence graphs across brand protection, IP enforcement, and grey market investigations. No install, no account — data never leaves the browser.",
+    tags: ["React", "TypeScript", "Cytoscape.js", "OSINT"],
+    url: "https://casegraph.io",
+    status: "live" as const,
+  },
+  {
     title: "Brand Channel Intelligence Dashboard",
     description:
       "Live dashboard for unauthorized seller monitoring, MAP compliance tracking, and grey market detection across Amazon marketplace data.",
@@ -38,6 +46,15 @@ const projects = [
     </div>
 
     <div class="project-explainers">
+      <div class="explainer">
+        <p class="explainer-title">CaseGraph</p>
+        <p class="explainer-body">
+          Pure client-side React app built on Cytoscape.js for graph rendering. All investigation data is stored in
+          localStorage — no backend, no accounts, no data transmitted. Supports 16 built-in entity types across
+          people, commerce, and digital infrastructure, with relationship edges, bulk CSV import, and export to
+          PNG, CSV, JSON, and PDF. Fills the gap between a whiteboard and a $5k/year enterprise OSINT platform.
+        </p>
+      </div>
       <div class="explainer">
         <p class="explainer-title">Brand Channel Intelligence Dashboard</p>
         <p class="explainer-body">
@@ -94,7 +111,7 @@ const projects = [
 
   @media (min-width: 640px) {
     .grid {
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
     }
   }
 
