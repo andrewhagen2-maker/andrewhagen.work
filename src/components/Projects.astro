@@ -4,6 +4,14 @@ import ProjectCard from "./ProjectCard.astro";
 
 const projects = [
   {
+    title: "PixelPing",
+    description:
+      "Retro-styled DNS and network diagnostics toolkit — DNS lookup, WHOIS, traceroute, reverse IP, HTTP headers, and geo IP, wrapped in a pixel-art SNES aesthetic.",
+    tags: ["Next.js", "TypeScript", "Vercel", "Network Diagnostics"],
+    url: "https://pixelp.ing",
+    status: "live" as const,
+  },
+  {
     title: "CaseGraph",
     description:
       "Browser-based link analysis tool for mapping entity relationships and building evidence graphs across brand protection, IP enforcement, and grey market investigations. No install, no account — data never leaves the browser.",
@@ -46,6 +54,15 @@ const projects = [
     </div>
 
     <div class="project-explainers">
+      <div class="explainer">
+        <p class="explainer-title">PixelPing</p>
+        <p class="explainer-body">
+          Seven network diagnostic tools running as Next.js API routes on Vercel. DNS resolution uses explicit
+          public nameserver overrides (8.8.8.8 / 1.1.1.1) via Node's dns/promises. WHOIS is a custom TCP client
+          with referral chain following — no third-party dependency. Traceroute streams live hop-by-hop output
+          via ReadableStream. All tools are free, no login required.
+        </p>
+      </div>
       <div class="explainer">
         <p class="explainer-title">CaseGraph</p>
         <p class="explainer-body">
@@ -112,6 +129,12 @@ const projects = [
   @media (min-width: 640px) {
     .grid {
       grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr 1fr 1fr;
     }
   }
 
