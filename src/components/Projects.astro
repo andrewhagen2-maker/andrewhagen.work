@@ -6,7 +6,7 @@ const projects = [
   {
     title: "PixelPing",
     description:
-      "Retro-styled DNS and network diagnostics toolkit — DNS lookup, WHOIS, traceroute, reverse IP, HTTP headers, and geo IP, wrapped in a pixel-art SNES aesthetic.",
+      "Retro-styled DNS and network diagnostics toolkit — DNS lookup, WHOIS, reverse IP, HTTP headers, and geo IP, wrapped in a pixel-art SNES aesthetic.",
     tags: ["Next.js", "TypeScript", "Vercel", "Network Diagnostics"],
     url: "https://pixelp.ing",
     status: "live" as const,
@@ -57,10 +57,9 @@ const projects = [
       <div class="explainer">
         <p class="explainer-title">PixelPing</p>
         <p class="explainer-body">
-          Seven network diagnostic tools running as Next.js API routes on Vercel. DNS resolution uses explicit
+          Network diagnostic tools running as Next.js API routes on Vercel. DNS resolution uses explicit
           public nameserver overrides (8.8.8.8 / 1.1.1.1) via Node's dns/promises. WHOIS is a custom TCP client
-          with referral chain following — no third-party dependency. Traceroute streams live hop-by-hop output
-          via ReadableStream. All tools are free, no login required.
+          with referral chain following — no third-party dependency. All tools are free, no login required.
         </p>
       </div>
       <div class="explainer">
