@@ -4,11 +4,11 @@ import ProjectCard from "./ProjectCard.astro";
 
 const projects = [
   {
-    title: "PixelPing",
+    title: "Brand Channel Intelligence Dashboard",
     description:
-      "Retro-styled DNS and network diagnostics toolkit — DNS lookup, WHOIS, reverse IP, HTTP headers, and geo IP, wrapped in a pixel-art SNES aesthetic.",
-    tags: ["Next.js", "TypeScript", "Vercel", "Network Diagnostics"],
-    url: "https://pixelp.ing",
+      "Live dashboard for unauthorized seller monitoring, MAP compliance tracking, and grey market detection across Amazon marketplace data.",
+    tags: ["Python", "Streamlit", "Keepa API", "Brand Protection"],
+    url: "https://dashboard.andrewhagen.work",
     status: "live" as const,
   },
   {
@@ -20,11 +20,11 @@ const projects = [
     status: "live" as const,
   },
   {
-    title: "Brand Channel Intelligence Dashboard",
+    title: "Authorized Seller Registry",
     description:
-      "Live dashboard for unauthorized seller monitoring, MAP compliance tracking, and grey market detection across Amazon marketplace data.",
-    tags: ["Python", "Streamlit", "Keepa API", "Brand Protection"],
-    url: "https://dashboard.andrewhagen.work",
+      "CRUD admin interface for managing an authorized retailer and reseller network — tracks entities, agreements, approved channels, and marketplace seller IDs.",
+    tags: ["JavaScript", "Supabase", "Vercel", "Distribution Compliance"],
+    url: "https://andrewhagen.work/reseller-registry",
     status: "live" as const,
   },
   {
@@ -36,11 +36,11 @@ const projects = [
     status: "live" as const,
   },
   {
-    title: "Authorized Seller Registry",
+    title: "PixelPing",
     description:
-      "CRUD admin interface for managing an authorized retailer and reseller network — tracks entities, agreements, approved channels, and marketplace seller IDs.",
-    tags: ["JavaScript", "Supabase", "Vercel", "Distribution Compliance"],
-    url: "https://andrewhagen.work/reseller-registry",
+      "Retro-styled DNS and network diagnostics toolkit — DNS lookup, WHOIS, reverse IP, HTTP headers, and geo IP, wrapped in a pixel-art SNES aesthetic.",
+    tags: ["Next.js", "TypeScript", "Vercel", "Network Diagnostics"],
+    url: "https://pixelp.ing",
     status: "live" as const,
   },
 ];
@@ -55,11 +55,11 @@ const projects = [
 
     <div class="project-explainers">
       <div class="explainer">
-        <p class="explainer-title">PixelPing</p>
+        <p class="explainer-title">Brand Channel Intelligence Dashboard</p>
         <p class="explainer-body">
-          Network diagnostic tools running as Next.js API routes on Vercel. DNS resolution uses explicit
-          public nameserver overrides (8.8.8.8 / 1.1.1.1) via Node's dns/promises. WHOIS is a custom TCP client
-          with referral chain following — no third-party dependency. All tools are free, no login required.
+          Pulls live offer data for monitored ASINs via the Keepa API on a daily GitHub Action schedule.
+          Data is written to an append-only snapshot file — the dashboard reads from that cache only,
+          never hitting the API directly. Real data, automated pipeline, read-only front end.
         </p>
       </div>
       <div class="explainer">
@@ -72,11 +72,12 @@ const projects = [
         </p>
       </div>
       <div class="explainer">
-        <p class="explainer-title">Brand Channel Intelligence Dashboard</p>
+        <p class="explainer-title">Authorized Seller Registry</p>
         <p class="explainer-body">
-          Pulls live offer data for monitored ASINs via the Keepa API on a daily GitHub Action schedule.
-          Data is written to an append-only snapshot file — the dashboard reads from that cache only,
-          never hitting the API directly. Real data, automated pipeline, read-only front end.
+          A working admin tool backed by a Postgres database (Supabase). Seller records store agreement type,
+          authorized countries, approved sale locations, and contact details. Each record supports child
+          channel authorizations — website domains or marketplace platform accounts (Amazon, eBay, Walmart)
+          with their own authorization dates and seller IDs. Open to view and edit; deletion is password-protected.
         </p>
       </div>
       <div class="explainer">
@@ -89,12 +90,11 @@ const projects = [
         </p>
       </div>
       <div class="explainer">
-        <p class="explainer-title">Authorized Seller Registry</p>
+        <p class="explainer-title">PixelPing</p>
         <p class="explainer-body">
-          A working admin tool backed by a Postgres database (Supabase). Seller records store agreement type,
-          authorized countries, approved sale locations, and contact details. Each record supports child
-          channel authorizations — website domains or marketplace platform accounts (Amazon, eBay, Walmart)
-          with their own authorization dates and seller IDs. Open to view and edit; deletion is password-protected.
+          Network diagnostic tools running as Next.js API routes on Vercel. DNS resolution uses explicit
+          public nameserver overrides (8.8.8.8 / 1.1.1.1) via Node's dns/promises. WHOIS is a custom TCP client
+          with referral chain following — no third-party dependency. All tools are free, no login required.
         </p>
       </div>
     </div>
